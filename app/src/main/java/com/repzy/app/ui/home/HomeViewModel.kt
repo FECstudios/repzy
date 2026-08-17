@@ -6,6 +6,7 @@ import android.content.Context
 import com.repzy.app.core.BodyMath
 import com.repzy.app.core.Perf
 import com.repzy.app.data.model.BodyMetric
+import com.repzy.app.data.local.UiPrefs
 import com.repzy.app.data.model.DailyBrief
 import com.repzy.app.data.model.DayNutrition
 import com.repzy.app.data.model.NutritionTarget
@@ -14,6 +15,7 @@ import com.repzy.app.data.repo.CoachRepository
 import com.repzy.app.data.repo.DailyLogRepository
 import com.repzy.app.data.repo.MealRepository
 import com.repzy.app.data.repo.ProfileRepository
+import com.repzy.app.data.repo.SubscriptionRepository
 import androidx.glance.appwidget.updateAll
 import com.repzy.app.widget.RepzyWidget
 import com.repzy.app.widget.WidgetData
@@ -44,6 +46,10 @@ data class HomeUiState(
     val brief: DailyBrief? = null,
     val isBriefLoading: Boolean = false,
     val briefError: String? = null,
+    val isPremium: Boolean = false,
+    val isCoachExpanded: Boolean = true,
+    val metricHistory: List<BodyMetric> = emptyList(),
+    val calorieHistory: Map<LocalDate, Int> = emptyMap(),
     val error: String? = null,
 ) {
     val bmi: Double?
@@ -59,6 +65,14 @@ data class HomeUiState(
         get() = if (waterTargetMl <= 0) 0f else (waterMl.toFloat() / waterTargetMl).coerceIn(0f, 1f)
 
     val waterGoalReached: Boolean get() = waterTargetMl > 0 && waterMl >= waterTargetMl
+
+    val calorieTarget: Int get() = target?.calories ?: 0
+
+    val calorieProgress: Float
+        get() = if (calorieTarget <= 0) 0f else (caloriesEaten.toFloat() / calorieTarget).coerceIn(0f, 1f)
+
+    /** Hedefin uzerine cikildiysa negatif gostermek yerine 0 diyoruz. */
+    val caloriesLeft: Int get() = (calorieTarget - caloriesEaten).coerceAtLeast(0)
 }
 
 /** Paralel yüklemenin sonucu — destructuring için data class. */
@@ -69,6 +83,8 @@ private data class LoadResults(
     val water: Result<Int>,
     val streak: Result<Int>,
     val nutrition: Result<DayNutrition>,
+    val history: Result<List<BodyMetric>>,
+    val calories: Result<Map<LocalDate, Int>>,
 )
 
 @HiltViewModel
@@ -79,6 +95,8 @@ class HomeViewModel @Inject constructor(
     private val coachRepository: CoachRepository,
     private val mealRepository: MealRepository,
     private val widgetSnapshotStore: WidgetSnapshotStore,
+    private val subscriptionRepository: SubscriptionRepository,
+    private val uiPrefs: UiPrefs,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -95,13 +113,15 @@ class HomeViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
 
             // Beşi birbirinden bağımsız — sırayla beklenirse açılış gecikmesi beş katına çıkıyor.
-            val (profile, target, metric, water, streak, nutrition) = Perf.time("home.load") { coroutineScope {
+            val (profile, target, metric, water, streak, nutrition, history, calories) = Perf.time("home.load") { coroutineScope {
                 val profileJob = async { profileRepository.getProfile() }
                 val targetJob = async { profileRepository.activeNutritionTarget() }
                 val metricJob = async { profileRepository.latestBodyMetric() }
                 val waterJob = async { dailyLogRepository.waterTotalMl(today) }
                 val streakJob = async { dailyLogRepository.currentStreak() }
                 val nutritionJob = async { mealRepository.logsOf(today) }
+                val historyJob = async { profileRepository.bodyMetricHistory(limit = 30) }
+                val calorieJob = async { mealRepository.caloriesByDay(today) }
                 LoadResults(
                     profileJob.await(),
                     targetJob.await(),
@@ -109,6 +129,8 @@ class HomeViewModel @Inject constructor(
                     waterJob.await(),
                     streakJob.await(),
                     nutritionJob.await(),
+                    historyJob.await(),
+                    calorieJob.await(),
                 )
             } }
 
@@ -122,12 +144,16 @@ class HomeViewModel @Inject constructor(
                 latestMetric = metric.getOrNull(),
                 waterMl = water.getOrDefault(0),
                 caloriesEaten = nutrition.getOrNull()?.calories ?: 0,
+                metricHistory = history.getOrDefault(emptyList()),
+                calorieHistory = calories.getOrDefault(emptyMap()),
                 streakDays = streak.getOrDefault(0),
                 error = failure?.message,
             )
 
             publishWidgetSnapshot()
             loadBrief(force = false)
+            loadPremium()
+            _state.update { it.copy(isCoachExpanded = uiPrefs.isCoachExpanded()) }
         }
     }
 
@@ -170,6 +196,21 @@ class HomeViewModel @Inject constructor(
                     _state.update { it.copy(isBriefLoading = false, briefError = e.message) }
                 }
         }
+    }
+
+    /** Premium ise upsell karti hic cizilmiyor. */
+    private fun loadPremium() {
+        viewModelScope.launch {
+            val premium = subscriptionRepository.isPremium().getOrDefault(false)
+            _state.update { it.copy(isPremium = premium) }
+        }
+    }
+
+    /** Koc karti cok yer kapliyordu; katlama tercihi DataStore'da kaliyor. */
+    fun toggleCoachCard() {
+        val expanded = !_state.value.isCoachExpanded
+        _state.update { it.copy(isCoachExpanded = expanded) }
+        viewModelScope.launch { uiPrefs.setCoachExpanded(expanded) }
     }
 
     fun dismissBriefError() = _state.update { it.copy(briefError = null) }

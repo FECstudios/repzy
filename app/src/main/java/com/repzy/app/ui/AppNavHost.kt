@@ -32,6 +32,7 @@ import com.repzy.app.ui.home.HomeScreen
 import com.repzy.app.ui.library.ExerciseDetailScreen
 import com.repzy.app.ui.library.ExerciseLibraryScreen
 import com.repzy.app.ui.nutrition.NutritionScreen
+import com.repzy.app.ui.paywall.PaywallScreen
 import com.repzy.app.ui.settings.SettingsScreen
 import com.repzy.app.ui.workout.WorkoutScreen
 import com.repzy.app.ui.workout.WorkoutViewModel
@@ -48,6 +49,9 @@ object LibraryRoute
 
 @Serializable
 object SettingsRoute
+
+@Serializable
+object PaywallRoute
 
 @Serializable
 data class ExerciseDetailRoute(val id: String)
@@ -83,7 +87,8 @@ fun AppNavHost(
 
     // Detay ve seçici tam ekran açılır — alt çubuk gizlenir.
     val showBottomBar = currentDestination?.hasRoute<ExerciseDetailRoute>() != true &&
-        currentDestination?.hasRoute<WorkoutPickerRoute>() != true
+        currentDestination?.hasRoute<WorkoutPickerRoute>() != true &&
+        currentDestination?.hasRoute<PaywallRoute>() != true
 
     Scaffold(
         bottomBar = {
@@ -116,13 +121,20 @@ fun AppNavHost(
             modifier = Modifier.padding(insets),
         ) {
             composable<HomeRoute> {
-                HomeScreen()
+                HomeScreen(onUpgradeClick = { navController.navigate(PaywallRoute) })
+            }
+
+            composable<PaywallRoute> {
+                PaywallScreen(onClose = { navController.popBackStack() })
             }
 
             composable<SettingsRoute> {
                 // Çıkış Ana sayfa'dan buraya taşındı: beş sekmede Home'un altındaki
                 // "Çıkış yap" bağlantısı yanlış yere düşüyordu.
-                SettingsScreen(onSignOut = onSignOut)
+                SettingsScreen(
+                    onSignOut = onSignOut,
+                    onPremiumClick = { navController.navigate(PaywallRoute) },
+                )
             }
 
             navigation<WorkoutGraph>(startDestination = WorkoutRoute) {
@@ -153,7 +165,7 @@ fun AppNavHost(
             }
 
             composable<NutritionRoute> {
-                NutritionScreen()
+                NutritionScreen(onUpgradeClick = { navController.navigate(PaywallRoute) })
             }
 
             composable<LibraryRoute> {

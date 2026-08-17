@@ -40,6 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.repzy.app.R
 import com.repzy.app.data.model.Exercise
+import com.repzy.app.ui.components.ExerciseMedia
 import com.repzy.app.ui.isTurkishUi
 
 @Composable
@@ -85,6 +86,13 @@ fun ExerciseDetailScreen(
         }
 
         Column(Modifier.padding(horizontal = 20.dp)) {
+            // Hareketi once goster, sonra anlat: metinden once gorsel daha ogretici.
+            ExerciseMedia(
+                animationUrl = exercise.animationUrl,
+                imageUrl = exercise.imageUrl,
+            )
+            Spacer(Modifier.height(14.dp))
+
             Text(
                 text = exercise.name(turkish),
                 style = MaterialTheme.typography.headlineMedium,

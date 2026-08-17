@@ -29,6 +29,7 @@ class ReminderWorker(
         val (titleRes, bodyRes) = when (kind) {
             KIND_WATER -> R.string.notif_water_title to R.string.notif_water_body
             KIND_WORKOUT -> R.string.notif_workout_title to R.string.notif_workout_body
+            KIND_PLAN -> R.string.notif_plan_title to R.string.notif_plan_body
             else -> return Result.success()
         }
 
@@ -62,6 +63,7 @@ class ReminderWorker(
         const val KEY_KIND = "kind"
         const val KIND_WATER = "water"
         const val KIND_WORKOUT = "workout"
+        const val KIND_PLAN = "plan"
 
         fun inputFor(kind: String) = workDataOf(KEY_KIND to kind)
     }

@@ -72,6 +72,28 @@ class MealRepository @Inject constructor(
         DayNutrition(logs)
     }
 
+    /**
+     * Son [days] günün günlük kalori toplamı. Tek sorgu + istemcide gruplama:
+     * gün başına ayrı sorgu atmak 7 ağ turu demek olurdu.
+     */
+    suspend fun caloriesByDay(today: LocalDate, days: Int = 7): Result<Map<LocalDate, Int>> =
+        runCatching {
+            val uid = requireUserId()
+            val from = LocalDate.fromEpochDays(today.toEpochDays() - (days - 1))
+
+            client.from("food_logs")
+                .select {
+                    filter {
+                        eq("user_id", uid)
+                        gte("log_date", from.toString())
+                    }
+                }
+                .decodeList<FoodLog>()
+                .filter { it.logDate != null }
+                .groupBy { it.logDate!! }
+                .mapValues { (_, logs) -> logs.sumOf { it.calories }.toInt() }
+        }
+
     /** Tahmin onaylandıktan sonra kalemleri tek tek yazar — kullanıcı sonra birini silebilir. */
     suspend fun addLogs(logs: List<FoodLog>): Result<Unit> = runCatching {
         if (logs.isEmpty()) return@runCatching

@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AssistChip
@@ -39,19 +42,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.repzy.app.R
 import com.repzy.app.data.model.DailyBrief
 import com.repzy.app.ui.components.MetricRow
+import com.repzy.app.ui.components.UpgradeCard
 import com.repzy.app.ui.components.MetricTile
 import java.util.Locale
 
 private val WATER_PRESETS_ML = listOf(200, 330, 500)
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(
+    onUpgradeClick: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
@@ -91,10 +99,16 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             )
         }
 
+        if (!state.isPremium) {
+            UpgradeCard(onClick = onUpgradeClick)
+        }
+
         CoachCard(
             brief = state.brief,
             isLoading = state.isBriefLoading,
             error = state.briefError,
+            expanded = state.isCoachExpanded,
+            onToggle = viewModel::toggleCoachCard,
             onRefresh = { viewModel.loadBrief(force = true) },
             onDismissError = viewModel::dismissBriefError,
         )
@@ -221,6 +235,8 @@ private fun CoachCard(
     brief: DailyBrief?,
     isLoading: Boolean,
     error: String?,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     onRefresh: () -> Unit,
     onDismissError: () -> Unit,
 ) {
@@ -263,6 +279,21 @@ private fun CoachCard(
                         )
                     }
                 }
+                if (brief != null) {
+                    IconButton(onClick = onToggle) {
+                        Icon(
+                            imageVector = if (expanded) {
+                                Icons.Default.ExpandLess
+                            } else {
+                                Icons.Default.ExpandMore
+                            },
+                            contentDescription = stringResource(
+                                if (expanded) R.string.coach_collapse else R.string.coach_expand,
+                            ),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
+                }
             }
 
             when {
@@ -279,6 +310,21 @@ private fun CoachCard(
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }
+                }
+
+                brief != null && !expanded -> {
+                    // Kapali durum: tek satir baslik. Karta dokunmak da aciyor,
+                    // kucuk chevron'u bulmak zorunda kalmasin.
+                    Text(
+                        text = brief.headline,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(onClick = onToggle),
+                    )
                 }
 
                 brief != null -> {

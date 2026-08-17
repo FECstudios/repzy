@@ -119,9 +119,40 @@ Amaç: uçtan uca çalışan ince bir dikey dilim. Önce bu bitecek.
 
 ### FAZ 2 — Kişiselleştirme
 - [ ] Egzersiz animasyonları (Lottie tercih — dosya boyutu küçük, native entegrasyon kolay)
-- [ ] Seviyeye göre program önerisi (kural tabanlı, AI değil)
+- [x] **Günlük plan üreticisi** (kural tabanlı, AI değil): `core/DailyPlanner.kt`.
+      Girdi hedef + seviye + ekipman + son 7 günün antrenman günleri. Yeni başlayana
+      tam vücut, ileri seviyeye üst/alt/karın dönüşümü; haftalık hedef dolduysa
+      dinlenme günü öneriyor. Aynı kas grubundan en fazla iki hareket.
+      Set/tekrar/dinlenme hedefe göre değişiyor. Antrenman sekmesinde "Bugünün planı"
+      kartı + "Bu planla başla" (planı hareketleriyle seansa çeviriyor).
+      **9 birim testi** bu kuralları koruyor. AI çağrısı yok — anında ve ücretsiz.
+- [x] **"Planın hazır" bildirimi**: Ayarlar'dan açılan üçüncü hatırlatıcı, varsayılan 08:00.
 - [ ] Sakatlık/ağrı modu (belirli kas grubunu programdan çıkar)
-- [ ] Bildirimler (antrenman, su, kalori)
+- [x] **Bildirimler**: WorkManager + `notifications/Reminders.kt`. Su (11:00/15:00/19:00) ve
+      antrenman (saat seçilebilir) hatırlatıcıları, Ayarlar'dan açılıp kapanıyor.
+      Android 13+ izni anahtar açılınca isteniyor, açılışta değil. Veri okumuyorlar
+      (saate dayalı) — işçi arka planda oturum yenilemek zorunda kalmasın diye.
+      **Gerçek cihazda doğrulandı**: 19:00 hatırlatıcısı kendiliğinden tetiklendi.
+- [x] **Ana ekran widget'ı** (Glance): streak, su ve kalan kalori; dokunmak uygulamayı açıyor.
+      Widget ağa çıkmıyor — uygulama her Home yüklemesinde `WidgetSnapshotStore`'a
+      anlık görüntü yazıyor, widget onu okuyor. Çıkışta temizleniyor.
+- [x] **Çoklu dil altyapısı**: `res/xml/locales_config.xml` + manifest `localeConfig`.
+      Android cihaz diline göre otomatik seçiyor; Ayarlar > Dil bölümünden sistemin
+      uygulama-başına dil ekranı açılıyor (API 33+, eskilerde uygulama ayarlarına düşüyor).
+      **Şu an çevrili: tr, en, ru** (values-ru tam çeviri; Rusça sekme etiketleri
+      beş sekmede iki satıra sardığı için kısaltıldı: Тренинг / Каталог). Yeni dil eklemek = `values-<kod>/strings.xml` çevirisi +
+      locales_config'e satır. Çevrilmemiş dili listeye EKLEME: kullanıcı İngilizce görür
+      ama uygulama o dili destekliyor sanılır.
+      _Egzersiz içeriği (isim/anlatım) DB'de sadece tr/en kolonlarında — yeni dilde
+      arayüz çevrilir ama egzersiz metinleri İngilizce kalır._
+- [~] **Paywall + abonelik**: `PaywallScreen` onboarding sonrası bir kez ve Ayarlar'dan
+      açılıyor (kapatılabilir, ücretsiz katman çalışmaya devam eder). Play Billing 9
+      bağlı; ürün Play Console'da tanımlı olmadığı için "satışa açık değil" durumu
+      gösteriliyor (cihazda doğrulandı, çökmüyor).
+      **Premium yetkisi SUNUCUDAN geliyor** (`is_premium()`, migration 0009):
+      `subscriptions` tablosuna kullanıcı yazamaz. Eksik olan tek parça
+      `verify-purchase` Edge Function'ı — Google Play Developer API ile satın alma
+      doğrulaması. O kurulmadan kimse premium olamıyor (bilinçli "fail closed").
 
 ### FAZ 3 — AI katmanı
 - [x] **Günlük koç brief'i**: Edge Function `daily-brief` + `coach_context()` RPC +
@@ -152,6 +183,32 @@ kullanımı bu RPC ile kaydet, `.from("ai_usage").insert()` kullanma.
 - [ ] Uyku takibi
 - [ ] Supplement rehberi (sağlık iddiası uyumluluk riski — dikkatli)
 - [ ] Sosyal / yarışma özellikleri (ancak ölçekte değerli)
+
+#### Upgrade girişleri
+Ana sayfa (üstte, koç kartının hemen üzerinde) ve Beslenme (tarama hakkı 2 veya altına
+düşünce) — `ui/components/UpgradeCard.kt`. Premium kullanıcıda hiç çizilmiyor.
+Antrenman ve Egzersizler sekmesine bilerek KONMADI: günlük plan ücretsiz, orada
+premium vurgusu yapmak yanlış beyan olurdu (`upsell_workout` / `upsell_library`
+dizeleri şimdilik kullanılmıyor).
+
+### Premium limitleri (sunucuda)
+| | Ücretsiz | Premium |
+|---|---|---|
+| Fotoğraf taraması / gün | 5 | 40 |
+| Koç brief yenileme / gün | 2 | 10 |
+
+Limitler Edge Function içinde `is_premium()` sonucuna göre seçiliyor; istemci söylemiyor.
+
+### Reklam kararı (17 Ağu 2026 — BEKLEMEDE)
+Ücretsiz katmanda hafif reklam istendi. Kodlanmadı, çünkü tek başına teknik bir iş değil:
+1. Gizlilik politikası şu an **"reklam yok, reklam kimliği toplanmıyor"** diyor —
+   reklam eklenirse metin ve Play Data Safety formu değişmek zorunda.
+2. GDPR/KVKK için **UMP (User Messaging Platform) rıza akışı** şart.
+3. Play sağlık verisini reklam hedeflemede kullanmayı yasaklıyor — reklam SDK'sına
+   hiçbir sağlık sinyali gitmemeli.
+4. Yaş 16+ olduğu için çocuk kitle kuralları devrede değil ama yaş beyanı tutarlı olmalı.
+Önerilen minimum: tek yerleşim (Egzersizler listesinin altında banner), interstitial YOK,
+premium'da tamamen kapalı. Karar kullanıcıya bırakıldı.
 
 ### YAPILMAYACAKLAR
 - Çekirdek döngü retention sağlamadan Faz 3-4'e geçmek

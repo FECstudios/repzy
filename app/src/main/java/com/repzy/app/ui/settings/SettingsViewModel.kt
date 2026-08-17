@@ -187,6 +187,14 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun setPlanReminder(enabled: Boolean) {
+        viewModelScope.launch {
+            reminderPrefs.setPlan(enabled)
+            Reminders.setPlanReminder(appContext, enabled, _state.value.reminders.planHour)
+            _state.update { it.copy(reminders = it.reminders.copy(plan = enabled)) }
+        }
+    }
+
     fun setWorkoutHour(hour: Int) {
         viewModelScope.launch {
             reminderPrefs.setWorkoutHour(hour)

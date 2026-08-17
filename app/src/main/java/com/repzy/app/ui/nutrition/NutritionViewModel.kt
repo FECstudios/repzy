@@ -15,6 +15,7 @@ import com.repzy.app.data.model.NutritionTarget
 import com.repzy.app.data.repo.AiFailure
 import com.repzy.app.data.repo.MealRepository
 import com.repzy.app.data.repo.ProfileRepository
+import com.repzy.app.data.repo.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -54,6 +55,7 @@ data class NutritionUiState(
     val pending: PendingAnalysis? = null,
     val scansRemaining: Int? = null,
     val error: String? = null,
+    val isPremium: Boolean = false,
 ) {
     val calorieTarget: Int get() = target?.calories ?: 0
     val calorieProgress: Float
@@ -66,6 +68,7 @@ data class NutritionUiState(
 class NutritionViewModel @Inject constructor(
     private val mealRepository: MealRepository,
     private val profileRepository: ProfileRepository,
+    private val subscriptionRepository: SubscriptionRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NutritionUiState())
@@ -87,9 +90,11 @@ class NutritionViewModel @Inject constructor(
                 dayJob.await() to targetJob.await()
             }
 
+            val premium = subscriptionRepository.isPremium().getOrDefault(false)
             _state.update {
                 it.copy(
                     isLoading = false,
+                    isPremium = premium,
                     day = day.getOrDefault(DayNutrition()),
                     target = target.getOrNull(),
                     error = day.exceptionOrNull()?.message,

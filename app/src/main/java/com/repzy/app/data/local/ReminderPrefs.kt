@@ -17,6 +17,8 @@ data class ReminderSettings(
     val water: Boolean = false,
     val workout: Boolean = false,
     val workoutHour: Int = Reminders.DEFAULT_WORKOUT_HOUR,
+    val plan: Boolean = false,
+    val planHour: Int = Reminders.DEFAULT_PLAN_HOUR,
 )
 
 @Singleton
@@ -26,12 +28,16 @@ class ReminderPrefs @Inject constructor(
     private val waterKey = booleanPreferencesKey("reminder_water")
     private val workoutKey = booleanPreferencesKey("reminder_workout")
     private val workoutHourKey = intPreferencesKey("reminder_workout_hour")
+    private val planKey = booleanPreferencesKey("reminder_plan")
+    private val planHourKey = intPreferencesKey("reminder_plan_hour")
 
     val settings: Flow<ReminderSettings> = dataStore.data.map { prefs ->
         ReminderSettings(
             water = prefs[waterKey] == true,
             workout = prefs[workoutKey] == true,
             workoutHour = prefs[workoutHourKey] ?: Reminders.DEFAULT_WORKOUT_HOUR,
+            plan = prefs[planKey] == true,
+            planHour = prefs[planHourKey] ?: Reminders.DEFAULT_PLAN_HOUR,
         )
     }
 
@@ -43,6 +49,10 @@ class ReminderPrefs @Inject constructor(
 
     suspend fun setWorkout(enabled: Boolean) {
         dataStore.edit { it[workoutKey] = enabled }
+    }
+
+    suspend fun setPlan(enabled: Boolean) {
+        dataStore.edit { it[planKey] = enabled }
     }
 
     suspend fun setWorkoutHour(hour: Int) {

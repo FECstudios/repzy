@@ -39,6 +39,15 @@ class OnboardingDraftStore @Inject constructor(
 
     suspend fun isProfileReady(): Boolean = profileReady.first()
 
+    /** Onboarding paywall'ı bir kez gösterilir; kullanıcı kapattıysa tekrar açılmaz. */
+    private val paywallSeenKey = booleanPreferencesKey("paywall_seen")
+
+    suspend fun isPaywallSeen(): Boolean = dataStore.data.map { it[paywallSeenKey] == true }.first()
+
+    suspend fun setPaywallSeen() {
+        dataStore.edit { it[paywallSeenKey] = true }
+    }
+
     suspend fun setProfileReady(ready: Boolean) {
         dataStore.edit { prefs ->
             if (ready) prefs[profileReadyKey] = true else prefs.remove(profileReadyKey)

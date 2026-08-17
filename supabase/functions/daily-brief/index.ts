@@ -13,6 +13,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const DEFAULT_BASE_URL = "https://ai.hackclub.com/proxy/v1";
 const DEFAULT_MODEL = "google/gemini-2.5-flash";
 const DEFAULT_DAILY_LIMIT = 2;
+const DEFAULT_PREMIUM_DAILY_LIMIT = 10;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -152,7 +153,10 @@ Deno.serve(async (req) => {
   }
 
   // 2. Yenileme isteniyorsa günlük limit.
-  const dailyLimit = Number(Deno.env.get("FREE_DAILY_BRIEFS") ?? DEFAULT_DAILY_LIMIT);
+  const { data: premium } = await supabase.rpc("is_premium");
+  const dailyLimit = premium === true
+    ? Number(Deno.env.get("PREMIUM_DAILY_BRIEFS") ?? DEFAULT_PREMIUM_DAILY_LIMIT)
+    : Number(Deno.env.get("FREE_DAILY_BRIEFS") ?? DEFAULT_DAILY_LIMIT);
   const { count } = await supabase
     .from("ai_usage")
     .select("id", { count: "exact", head: true })

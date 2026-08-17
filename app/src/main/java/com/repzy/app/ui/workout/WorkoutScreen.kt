@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -43,11 +44,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.repzy.app.R
+import com.repzy.app.core.DailyPlan
+import com.repzy.app.core.PlanFocus
+import com.repzy.app.ui.components.Badge
+import com.repzy.app.ui.components.Decor
 import com.repzy.app.data.model.WorkoutSet
 import com.repzy.app.ui.components.MetricRow
 import com.repzy.app.ui.components.MetricTile
@@ -104,7 +110,11 @@ fun WorkoutScreen(
                 onAddExerciseClick = onAddExerciseClick,
             )
         } else {
-            IdleWorkout(state = state, onStart = viewModel::startWorkout)
+            IdleWorkout(
+                state = state,
+                onStart = viewModel::startWorkout,
+                onStartPlan = viewModel::startPlannedWorkout,
+            )
         }
 
         Spacer(Modifier.height(32.dp))
@@ -112,14 +122,21 @@ fun WorkoutScreen(
 }
 
 @Composable
-private fun IdleWorkout(state: WorkoutUiState, onStart: () -> Unit) {
-    Button(
+private fun IdleWorkout(
+    state: WorkoutUiState,
+    onStart: () -> Unit,
+    onStartPlan: () -> Unit,
+) {
+    state.plan?.let { plan -> PlanCard(plan = plan, onStartPlan = onStartPlan) }
+
+    Spacer(Modifier.height(4.dp))
+    OutlinedButton(
         onClick = onStart,
         modifier = Modifier
             .fillMaxWidth()
             .height(52.dp),
     ) {
-        Text(stringResource(R.string.workout_start))
+        Text(stringResource(R.string.workout_start_empty))
     }
 
     Spacer(Modifier.height(8.dp))
@@ -161,6 +178,114 @@ private fun IdleWorkout(state: WorkoutUiState, onStart: () -> Unit) {
             }
         }
     }
+}
+
+/**
+ * Bugunun plani. Kural tabanli uretiliyor (AI degil), o yuzden aninda hazir --
+ * kullanici uygulamayi actiginda bekleme yok.
+ */
+@Composable
+private fun PlanCard(plan: DailyPlan, onStartPlan: () -> Unit) {
+    Card(
+        shape = Decor.CardShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(18.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.EventAvailable,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    text = stringResource(R.string.plan_today_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                if (!plan.isRestDay) {
+                    Badge(text = stringResource(R.string.plan_minutes, plan.estimatedMinutes))
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(focusLabel(plan.focus)),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+            )
+
+            if (plan.isRestDay) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.plan_rest_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                return@Column
+            }
+
+            Spacer(Modifier.height(10.dp))
+            val turkish = isTurkishUi()
+            plan.exercises.forEach { planned ->
+                Row(
+                    modifier = Modifier.padding(vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = planned.exercise.name(turkish),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = if (planned.isTimeBased) {
+                            stringResource(
+                                R.string.plan_sets_seconds,
+                                planned.sets,
+                                planned.repsLow,
+                                planned.repsHigh,
+                            )
+                        } else {
+                            stringResource(
+                                R.string.plan_sets_reps,
+                                planned.sets,
+                                planned.repsLow,
+                                planned.repsHigh,
+                            )
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+            Button(
+                onClick = onStartPlan,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.plan_start),
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+    }
+}
+
+private fun focusLabel(focus: PlanFocus): Int = when (focus) {
+    PlanFocus.FULL_BODY -> R.string.plan_focus_full_body
+    PlanFocus.UPPER -> R.string.plan_focus_upper
+    PlanFocus.LOWER -> R.string.plan_focus_lower
+    PlanFocus.CORE_CARDIO -> R.string.plan_focus_core
+    PlanFocus.REST -> R.string.plan_focus_rest
 }
 
 @Composable

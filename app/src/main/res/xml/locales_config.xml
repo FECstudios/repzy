@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Desteklenen diller. Android bu listeye bakarak cihaz diline en uygun olanı
+  otomatik seçiyor; kullanıcı Sistem Ayarları > Uygulamalar > Repzy > Dil
+  üzerinden de değiştirebiliyor (uygulama başına dil, API 33+).
+
+  Listeye yeni dil eklerken values-<kod>/strings.xml de eklenmeli, yoksa
+  o dilde İngilizceye düşer.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+      Buraya SADECE values-<kod>/strings.xml dosyası tam çevrilmiş diller yazılır.
+      Çevirisi olmayan bir dili listelemek "bu dili destekliyoruz" demek olur ama
+      kullanıcı İngilizce görür — o yüzden es/de çevrilene kadar eklenmedi.
+    -->
+    <locale android:name="tr" />
+    <locale android:name="en" />
+    <locale android:name="ru" />
+</locale-config>

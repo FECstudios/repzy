@@ -2,10 +2,13 @@ package com.repzy.app.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.repzy.app.core.DailyPlan
+import com.repzy.app.core.DailyPlanner
 import com.repzy.app.data.model.Exercise
 import com.repzy.app.data.model.Workout
 import com.repzy.app.data.model.WorkoutSet
 import com.repzy.app.data.repo.ExerciseRepository
+import com.repzy.app.data.repo.ProfileRepository
 import com.repzy.app.data.repo.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -15,6 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toKotlinLocalDate
 import javax.inject.Inject
 
 /** Seanstaki tek egzersiz: girilen setler + geçen seferin referansı. */
@@ -42,6 +47,8 @@ data class WorkoutUiState(
     val workout: Workout? = null,
     val entries: List<WorkoutEntry> = emptyList(),
     val history: List<Workout> = emptyList(),
+    /** Bugünün kural tabanlı planı; oturum başlatılmadan gösterilir. */
+    val plan: DailyPlan? = null,
     val perceivedEffort: Int? = null,
     val isFinishing: Boolean = false,
     val error: String? = null,
@@ -55,6 +62,7 @@ data class WorkoutUiState(
 class WorkoutViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
     private val exerciseRepository: ExerciseRepository,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(WorkoutUiState())
@@ -85,6 +93,54 @@ class WorkoutViewModel @Inject constructor(
                 )
             }
             if (workout?.id != null) restoreEntries(workout.id)
+            buildPlan(history.getOrDefault(emptyList()))
+        }
+    }
+
+    /**
+     * Günün planını kurar. Kural tabanlı ve tamamen istemcide — AI çağrısı yok,
+     * yani anında ve ücretsiz. Girdi: profil + kütüphane + son 7 günün antrenmanları.
+     */
+    private suspend fun buildPlan(history: List<Workout>) {
+        val (profile, library) = coroutineScope {
+            val p = async { profileRepository.getProfile() }
+            val l = async { exerciseRepository.all() }
+            p.await().getOrNull() to l.await().getOrDefault(emptyList())
+        }
+
+        val goal = profile?.goal ?: return
+        val level = profile.experienceLevel ?: return
+        val equipment = profile.equipmentAccess ?: return
+        if (library.isEmpty()) return
+
+        val today = java.time.LocalDate.now().toKotlinLocalDate()
+        val trained = history.mapNotNull { it.startedAt?.take(10)?.toLocalDateOrNull() }.toSet()
+
+        val plan = DailyPlanner.planFor(
+            today = today,
+            goal = goal,
+            level = level,
+            equipment = equipment,
+            trainedDatesLast7 = trained.filter { it.toEpochDays() > today.toEpochDays() - 7 }.toSet(),
+            library = library,
+        )
+        _state.update { it.copy(plan = plan) }
+    }
+
+    /** Planı seansa çevirir: antrenmanı başlatıp planlanan hareketleri ekliyor. */
+    fun startPlannedWorkout() {
+        val plan = _state.value.plan ?: return
+        if (plan.exercises.isEmpty() || _state.value.hasActiveWorkout) return
+
+        viewModelScope.launch {
+            workoutRepository.startWorkout(title = null)
+                .onSuccess { workout ->
+                    _state.update {
+                        it.copy(workout = workout, entries = emptyList(), perceivedEffort = null)
+                    }
+                    plan.exercises.forEach { planned -> addExercise(planned.exercise.id) }
+                }
+                .onFailure { e -> _state.update { it.copy(error = e.message) } }
         }
     }
 
@@ -263,6 +319,9 @@ class WorkoutViewModel @Inject constructor(
         }
     }
 }
+
+/** "2026-08-17" → LocalDate; biçim beklenmedikse null (sunucu formatı değişirse çökmesin). */
+private fun String.toLocalDateOrNull(): LocalDate? = runCatching { LocalDate.parse(this) }.getOrNull()
 
 /** Ağırlık alanı: rakam ve tek ondalık ayırıcı, virgül noktaya çevrilir. */
 private fun String.asDecimal(): String {

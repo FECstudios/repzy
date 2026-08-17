@@ -23,6 +23,7 @@ import com.repzy.app.ui.ErrorScreen
 import com.repzy.app.ui.RootViewModel
 import com.repzy.app.ui.auth.AuthScreen
 import com.repzy.app.ui.onboarding.OnboardingScreen
+import com.repzy.app.ui.paywall.PaywallScreen
 import com.repzy.app.ui.theme.RepzyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -68,6 +69,8 @@ private fun RepzyRoot(viewModel: RootViewModel = hiltViewModel()) {
             pendingPlan = pendingPlan,
             onCancel = if (signInCancellable) viewModel::cancelSignIn else null,
         )
+
+        AppDestination.PAYWALL -> PaywallScreen(onClose = viewModel::dismissPaywall)
 
         AppDestination.HOME -> AppNavHost(onSignOut = viewModel::signOut)
 

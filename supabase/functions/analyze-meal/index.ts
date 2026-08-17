@@ -14,6 +14,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const DEFAULT_BASE_URL = "https://ai.hackclub.com/proxy/v1";
 const DEFAULT_MODEL = "google/gemini-2.5-flash";
 const DEFAULT_DAILY_LIMIT = 5;
+const DEFAULT_PREMIUM_DAILY_LIMIT = 40;
 
 // Base64 payload üst sınırı. İstemci ~1024 px JPEG gönderiyor (~300 KB);
 // 8 MB'lık ham fotoğraf hem yavaş hem pahalı, kapıda kesiyoruz.
@@ -168,7 +169,11 @@ Deno.serve(async (req) => {
   const locale = body.locale ?? "tr";
 
   // Ücretsiz katman taraması: günlük limit. Vision çağrısı maliyetin tamamı burada.
-  const dailyLimit = Number(Deno.env.get("FREE_DAILY_FOOD_SCANS") ?? DEFAULT_DAILY_LIMIT);
+  // Premium durumu SUNUCUDAN okunuyor; istemcinin söylediğine güvenilmez.
+  const { data: premium } = await supabase.rpc("is_premium");
+  const dailyLimit = premium === true
+    ? Number(Deno.env.get("PREMIUM_DAILY_FOOD_SCANS") ?? DEFAULT_PREMIUM_DAILY_LIMIT)
+    : Number(Deno.env.get("FREE_DAILY_FOOD_SCANS") ?? DEFAULT_DAILY_LIMIT);
   const today = new Date().toISOString().slice(0, 10);
   const { count, error: countError } = await supabase
     .from("ai_usage")
@@ -179,7 +184,7 @@ Deno.serve(async (req) => {
   if (countError) return json({ error: "usage_check_failed" }, 500);
   const used = count ?? 0;
   if (used >= dailyLimit) {
-    return json({ error: "daily_limit_reached", limit: dailyLimit, used }, 429);
+    return json({ error: "daily_limit_reached", limit: dailyLimit, used, premium: premium === true }, 429);
   }
 
   const model = Deno.env.get("AI_MODEL") ?? DEFAULT_MODEL;

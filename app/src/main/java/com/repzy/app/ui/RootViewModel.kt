@@ -9,6 +9,7 @@ import com.repzy.app.data.local.OnboardingDraft
 import com.repzy.app.data.local.OnboardingDraftStore
 import com.repzy.app.data.repo.AuthRepository
 import com.repzy.app.data.repo.ProfileRepository
+import com.repzy.app.widget.WidgetSnapshotStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,7 @@ import kotlinx.datetime.toKotlinLocalDate
 import java.util.Locale
 import javax.inject.Inject
 
-enum class AppDestination { LOADING, ONBOARDING, AUTH, HOME, ERROR }
+enum class AppDestination { LOADING, ONBOARDING, AUTH, PAYWALL, HOME, ERROR }
 
 /**
  * Akışın tek karar noktası. Onboarding giriş ÖNCESİNDE olduğu için yönlendirme
@@ -40,6 +41,7 @@ class RootViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
     private val draftStore: OnboardingDraftStore,
+    private val widgetSnapshotStore: WidgetSnapshotStore,
 ) : ViewModel() {
 
     private val _destination = MutableStateFlow(AppDestination.LOADING)
@@ -95,7 +97,17 @@ class RootViewModel @Inject constructor(
             // Önbellekteki profil temizlenmezse başka hesapla girişte eski isim görünür.
             profileRepository.invalidateProfile()
             draftStore.setProfileReady(false)
+            // Widget başkasının verisini göstermesin.
+            widgetSnapshotStore.clear()
             authRepository.signOut()
+        }
+    }
+
+    /** Paywall kapatıldı — bir daha otomatik açılmaz. */
+    fun dismissPaywall() {
+        viewModelScope.launch {
+            draftStore.setPaywallSeen()
+            _destination.value = AppDestination.HOME
         }
     }
 
@@ -171,7 +183,13 @@ class RootViewModel @Inject constructor(
                     // durursa çıkış yapıldığında tekrar ortaya çıkardı.
                     if (draft != null) draftStore.clear()
                     draftStore.setProfileReady(true)
-                    _destination.value = AppDestination.HOME
+                    // Onboarding paywall'ı bir kez gösterilir; kapatılabilir, ücretsiz
+                    // katman çalışmaya devam eder.
+                    _destination.value = if (draftStore.isPaywallSeen()) {
+                        AppDestination.HOME
+                    } else {
+                        AppDestination.PAYWALL
+                    }
                 } else {
                     // İşaret yanlışmış (hesap silinmiş, profil sıfırlanmış): geri al.
                     draftStore.setProfileReady(false)

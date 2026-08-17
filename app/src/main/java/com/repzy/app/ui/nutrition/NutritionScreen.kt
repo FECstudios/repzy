@@ -61,6 +61,7 @@ import com.repzy.app.data.model.FoodLog
 import com.repzy.app.data.model.MealItem
 import com.repzy.app.data.model.MealType
 import com.repzy.app.ui.components.MetricRow
+import com.repzy.app.ui.components.UpgradeCard
 import com.repzy.app.ui.components.MetricTile
 import com.repzy.app.ui.isTurkishUi
 import java.io.File
@@ -68,7 +69,10 @@ import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class) // ModalBottomSheet
 @Composable
-fun NutritionScreen(viewModel: NutritionViewModel = hiltViewModel()) {
+fun NutritionScreen(
+    onUpgradeClick: () -> Unit,
+    viewModel: NutritionViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val turkish = isTurkishUi()
@@ -170,6 +174,14 @@ fun NutritionScreen(viewModel: NutritionViewModel = hiltViewModel()) {
                     Text(stringResource(R.string.nutrition_pick_photo), maxLines = 1, softWrap = false)
                 }
             }
+        }
+
+        // Tarama hakki azaldiginda upsell burada anlam kazaniyor.
+        if (!state.isPremium && (state.scansRemaining ?: 99) <= 2) {
+            UpgradeCard(
+                onClick = onUpgradeClick,
+                note = stringResource(R.string.upsell_nutrition),
+            )
         }
 
         state.scansRemaining?.let { remaining ->

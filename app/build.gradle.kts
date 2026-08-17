@@ -103,6 +103,12 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    // Egzersiz animasyonlari: animasyonlu WebP/GIF cozucusu.
+    implementation(libs.coil.gif)
+
+    // MP4 egzersiz videosu icin oynatici.
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
 
     // Kameradan gelen fotoğrafın EXIF yönünü düzeltmek için.
     implementation(libs.androidx.exifinterface)

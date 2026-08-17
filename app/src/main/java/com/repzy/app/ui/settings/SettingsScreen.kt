@@ -3,6 +3,8 @@ package com.repzy.app.ui.settings
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,10 +58,12 @@ import com.repzy.app.data.model.Sex
 import com.repzy.app.ui.components.MeasureField
 import com.repzy.app.ui.components.WeightChart
 import com.repzy.app.ui.isTurkishUi
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
     onSignOut: () -> Unit,
+    onPremiumClick: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -341,6 +346,16 @@ fun SettingsScreen(
 
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
+        // --- Premium ---
+        Button(
+            onClick = onPremiumClick,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.settings_go_premium))
+        }
+
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
         // --- Hatırlatıcılar ---
         SectionTitle(stringResource(R.string.settings_section_reminders))
 
@@ -356,6 +371,22 @@ fun SettingsScreen(
                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 } else {
                     viewModel.setWaterReminder(enabled)
+                }
+            },
+        )
+
+        SwitchRow(
+            title = stringResource(R.string.settings_reminder_plan),
+            subtitle = stringResource(
+                R.string.settings_reminder_plan_desc,
+                "%02d:00".format(state.reminders.planHour),
+            ),
+            checked = state.reminders.plan,
+            onCheckedChange = { enabled ->
+                if (enabled && state.notificationsBlocked) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    viewModel.setPlanReminder(enabled)
                 }
             },
         )
@@ -401,6 +432,20 @@ fun SettingsScreen(
         }
 
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+        // --- Dil ---
+        SectionTitle(stringResource(R.string.settings_section_language))
+        Text(
+            text = stringResource(R.string.settings_language_desc, currentLanguageLabel()),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(
+            onClick = { openAppLanguageSettings(context) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.settings_change_language))
+        }
 
         // --- Yasal ---
         SectionTitle(stringResource(R.string.settings_section_legal))
@@ -541,6 +586,31 @@ fun SettingsScreen(
             },
         )
     }
+}
+
+/** Cihazin secili dilinin kendi adi ("Turkce", "English"). */
+@Composable
+private fun currentLanguageLabel(): String {
+    val locales = LocalConfiguration.current.locales
+    val locale = if (locales.isEmpty) Locale.getDefault() else locales[0]
+    return locale.getDisplayLanguage(locale).replaceFirstChar { it.uppercase(locale) }
+}
+
+/**
+ * Uygulama basina dil ekranini acar (Android 13+). Sistem ekranini kullanmak,
+ * kendi dil listemizi yonetmekten iyi: Android desteklenen dilleri
+ * locales_config.xml'den okuyor ve secimi kendisi kaliciliyor.
+ * Eski surumlerde bu ekran yok, uygulama ayarlarina dusuyoruz.
+ */
+private fun openAppLanguageSettings(context: Context) {
+    val appLocale = Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+    }
+    val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+    }
+    runCatching { context.startActivity(appLocale) }
+        .recoverCatching { context.startActivity(fallback) }
 }
 
 @Composable

@@ -29,11 +29,15 @@ object Reminders {
     /** WorkManager'da tekil isimler: aynı hatırlatıcı iki kez planlanmasın. */
     private const val WORK_WATER_PREFIX = "reminder_water_"
     private const val WORK_WORKOUT = "reminder_workout"
+    private const val WORK_PLAN = "reminder_plan"
 
     /** Su hatırlatma saatleri — günü kaplayacak kadar sık, rahatsız etmeyecek kadar seyrek. */
     val WATER_HOURS = listOf(11, 15, 19)
 
     const val DEFAULT_WORKOUT_HOUR = 18
+
+    /** Plan bildirimi sabah gider: kullanicinin gunu planlamasi icin erken olmali. */
+    const val DEFAULT_PLAN_HOUR = 8
 
     fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -88,6 +92,19 @@ object Reminders {
             WORK_WORKOUT,
             ExistingPeriodicWorkPolicy.UPDATE,
             dailyRequest(ReminderWorker.KIND_WORKOUT, hour),
+        )
+    }
+
+    fun setPlanReminder(context: Context, enabled: Boolean, hour: Int = DEFAULT_PLAN_HOUR) {
+        val manager = WorkManager.getInstance(context)
+        if (!enabled) {
+            manager.cancelUniqueWork(WORK_PLAN)
+            return
+        }
+        manager.enqueueUniquePeriodicWork(
+            WORK_PLAN,
+            ExistingPeriodicWorkPolicy.UPDATE,
+            dailyRequest(ReminderWorker.KIND_PLAN, hour),
         )
     }
 
