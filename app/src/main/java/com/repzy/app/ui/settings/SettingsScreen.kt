@@ -1,7 +1,10 @@
 package com.repzy.app.ui.settings
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +29,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,6 +46,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.repzy.app.R
 import com.repzy.app.core.Legal
+import com.repzy.app.notifications.Reminders
 import com.repzy.app.data.model.ActivityLevel
 import com.repzy.app.data.model.EquipmentAccess
 import com.repzy.app.data.model.ExperienceLevel
@@ -61,6 +66,14 @@ fun SettingsScreen(
     val turkish = isTurkishUi()
     // Onay kelimesi çevrilebilir: İngilizce arayüzde DELETE, Türkçede SİL yazılır.
     val confirmationWord = stringResource(R.string.settings_delete_word)
+
+    // Android 13+ bildirim izni: kullanıcı anahtarı açtığında isteniyor, açılışta değil.
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        viewModel.refreshNotificationPermission()
+        if (granted) viewModel.setWaterReminder(true)
+    }
 
     if (state.isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -328,6 +341,67 @@ fun SettingsScreen(
 
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
+        // --- Hatırlatıcılar ---
+        SectionTitle(stringResource(R.string.settings_section_reminders))
+
+        SwitchRow(
+            title = stringResource(R.string.settings_reminder_water),
+            subtitle = stringResource(
+                R.string.settings_reminder_water_desc,
+                Reminders.WATER_HOURS.joinToString(", ") { "%02d:00".format(it) },
+            ),
+            checked = state.reminders.water,
+            onCheckedChange = { enabled ->
+                if (enabled && state.notificationsBlocked) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    viewModel.setWaterReminder(enabled)
+                }
+            },
+        )
+
+        SwitchRow(
+            title = stringResource(R.string.settings_reminder_workout),
+            subtitle = stringResource(
+                R.string.settings_reminder_workout_desc,
+                "%02d:00".format(state.reminders.workoutHour),
+            ),
+            checked = state.reminders.workout,
+            onCheckedChange = { enabled ->
+                if (enabled && state.notificationsBlocked) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    viewModel.setWorkoutReminder(enabled)
+                }
+            },
+        )
+
+        if (state.reminders.workout) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                listOf(7, 9, 12, 17, 18, 19, 20, 21).forEach { hour ->
+                    FilterChip(
+                        selected = state.reminders.workoutHour == hour,
+                        onClick = { viewModel.setWorkoutHour(hour) },
+                        label = { Text("%02d:00".format(hour)) },
+                    )
+                }
+            }
+        }
+
+        if (state.notificationsBlocked) {
+            Text(
+                text = stringResource(R.string.settings_notifications_blocked),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
         // --- Yasal ---
         SectionTitle(stringResource(R.string.settings_section_legal))
 
@@ -472,6 +546,29 @@ fun SettingsScreen(
 @Composable
 private fun SectionTitle(text: String) {
     Text(text = text, style = MaterialTheme.typography.titleMedium)
+}
+
+@Composable
+private fun SwitchRow(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
 }
 
 /**

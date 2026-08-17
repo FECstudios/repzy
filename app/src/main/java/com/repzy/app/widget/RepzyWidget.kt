@@ -1,7 +1,6 @@
 package com.repzy.app.widget
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
@@ -58,7 +57,7 @@ private fun WidgetContent(context: Context, data: WidgetData) {
             .background(GlanceTheme.colors.widgetBackground)
             .cornerRadius(20.dp)
             .padding(14.dp)
-            .clickable(actionStartActivity(Intent(context, MainActivity::class.java))),
+            .clickable(actionStartActivity<MainActivity>()),
     ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),

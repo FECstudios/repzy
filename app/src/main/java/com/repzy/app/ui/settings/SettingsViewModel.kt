@@ -1,5 +1,6 @@
 package com.repzy.app.ui.settings
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.repzy.app.core.BodyMath
@@ -14,8 +15,12 @@ import com.repzy.app.data.model.Goal
 import com.repzy.app.data.model.NutritionTarget
 import com.repzy.app.data.model.Profile
 import com.repzy.app.data.model.Sex
+import com.repzy.app.data.local.ReminderPrefs
+import com.repzy.app.data.local.ReminderSettings
 import com.repzy.app.data.repo.ProfileRepository
+import com.repzy.app.notifications.Reminders
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +68,8 @@ data class SettingsUiState(
     val isSaving: Boolean = false,
     val savedMessage: Int? = null,
     val error: String? = null,
+    val reminders: ReminderSettings = ReminderSettings(),
+    val notificationsBlocked: Boolean = false,
     val isDeleteDialogOpen: Boolean = false,
     val deleteConfirmation: String = "",
     val isDeleting: Boolean = false,
@@ -99,7 +106,9 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val profileRepository: ProfileRepository,
+    private val reminderPrefs: ReminderPrefs,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
@@ -152,8 +161,46 @@ class SettingsViewModel @Inject constructor(
                 fatG = tgt?.fatG?.toString().orEmpty(),
                 waterMl = tgt?.waterMl?.toString().orEmpty(),
                 error = profile.exceptionOrNull()?.message,
+                reminders = reminderPrefs.load(),
+                notificationsBlocked = !Reminders.hasPermission(appContext),
             )
         }
+    }
+
+    /**
+     * Hatırlatıcı anahtarı. Tercih DataStore'a yazılıyor, planlama WorkManager'a
+     * devrediliyor — uygulama kapalıyken de çalışması gerekiyor.
+     */
+    fun setWaterReminder(enabled: Boolean) {
+        viewModelScope.launch {
+            reminderPrefs.setWater(enabled)
+            Reminders.setWaterReminders(appContext, enabled)
+            _state.update { it.copy(reminders = it.reminders.copy(water = enabled)) }
+        }
+    }
+
+    fun setWorkoutReminder(enabled: Boolean) {
+        viewModelScope.launch {
+            reminderPrefs.setWorkout(enabled)
+            Reminders.setWorkoutReminder(appContext, enabled, _state.value.reminders.workoutHour)
+            _state.update { it.copy(reminders = it.reminders.copy(workout = enabled)) }
+        }
+    }
+
+    fun setWorkoutHour(hour: Int) {
+        viewModelScope.launch {
+            reminderPrefs.setWorkoutHour(hour)
+            val settings = reminderPrefs.load()
+            if (settings.workout) {
+                Reminders.setWorkoutReminder(appContext, true, settings.workoutHour)
+            }
+            _state.update { it.copy(reminders = settings) }
+        }
+    }
+
+    /** İzin diyaloğu kapandıktan sonra durumu tazele. */
+    fun refreshNotificationPermission() {
+        _state.update { it.copy(notificationsBlocked = !Reminders.hasPermission(appContext)) }
     }
 
     fun onName(value: String) = _state.update { it.copy(name = value.take(40)) }

@@ -254,4 +254,18 @@
     <string name="settings_delete_word">DELETE</string>
     <string name="settings_delete_hint">Type %1$s to confirm</string>
     <string name="settings_delete_confirm">Delete permanently</string>
+    <string name="settings_section_reminders">Reminders</string>
+    <string name="settings_reminder_water">Water reminders</string>
+    <string name="settings_reminder_water_desc">Daily at %1$s</string>
+    <string name="settings_reminder_workout">Workout reminder</string>
+    <string name="settings_reminder_workout_desc">Daily at %1$s</string>
+    <string name="settings_notifications_blocked">Notifications are turned off for Repzy. Allow them to receive reminders.</string>
+    <string name="notif_channel_name">Reminders</string>
+    <string name="notif_channel_desc">Water and workout reminders</string>
+    <string name="notif_water_title">Time for water</string>
+    <string name="notif_water_body">Log a glass and keep your streak going.</string>
+    <string name="notif_workout_title">Workout time</string>
+    <string name="notif_workout_body">Even 20 minutes counts. Start a session.</string>
+    <string name="widget_description">Water, calories and your streak at a glance</string>
+    <string name="widget_empty">Open Repzy to set up your plan.</string>
 </resources>

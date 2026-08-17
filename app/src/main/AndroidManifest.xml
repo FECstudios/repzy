@@ -3,6 +3,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Hatırlatıcılar için; Android 13+ çalışma zamanında sorulur. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Play Billing: abonelik satın alma. -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:name=".RepzyApp"
@@ -31,6 +35,17 @@
             CAMERA izni bilerek istenmiyor: fotoğrafı sistem kamerası çekiyor, biz sadece
             dosyayı alıyoruz — böylece çalışma zamanı izin diyaloğu hiç çıkmıyor.
         -->
+        <receiver
+            android:name=".widget.RepzyWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/repzy_widget_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

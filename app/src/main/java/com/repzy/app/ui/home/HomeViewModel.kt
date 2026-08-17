@@ -2,16 +2,24 @@ package com.repzy.app.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
 import com.repzy.app.core.BodyMath
 import com.repzy.app.core.Perf
 import com.repzy.app.data.model.BodyMetric
 import com.repzy.app.data.model.DailyBrief
+import com.repzy.app.data.model.DayNutrition
 import com.repzy.app.data.model.NutritionTarget
 import com.repzy.app.data.model.Profile
 import com.repzy.app.data.repo.CoachRepository
 import com.repzy.app.data.repo.DailyLogRepository
+import com.repzy.app.data.repo.MealRepository
 import com.repzy.app.data.repo.ProfileRepository
+import androidx.glance.appwidget.updateAll
+import com.repzy.app.widget.RepzyWidget
+import com.repzy.app.widget.WidgetData
+import com.repzy.app.widget.WidgetSnapshotStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +38,7 @@ data class HomeUiState(
     val target: NutritionTarget? = null,
     val latestMetric: BodyMetric? = null,
     val waterMl: Int = 0,
+    val caloriesEaten: Int = 0,
     val streakDays: Int = 0,
     val isWaterUpdating: Boolean = false,
     val brief: DailyBrief? = null,
@@ -59,13 +68,17 @@ private data class LoadResults(
     val metric: Result<BodyMetric?>,
     val water: Result<Int>,
     val streak: Result<Int>,
+    val nutrition: Result<DayNutrition>,
 )
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val profileRepository: ProfileRepository,
     private val dailyLogRepository: DailyLogRepository,
     private val coachRepository: CoachRepository,
+    private val mealRepository: MealRepository,
+    private val widgetSnapshotStore: WidgetSnapshotStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -82,18 +95,20 @@ class HomeViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
 
             // Beşi birbirinden bağımsız — sırayla beklenirse açılış gecikmesi beş katına çıkıyor.
-            val (profile, target, metric, water, streak) = Perf.time("home.load") { coroutineScope {
+            val (profile, target, metric, water, streak, nutrition) = Perf.time("home.load") { coroutineScope {
                 val profileJob = async { profileRepository.getProfile() }
                 val targetJob = async { profileRepository.activeNutritionTarget() }
                 val metricJob = async { profileRepository.latestBodyMetric() }
                 val waterJob = async { dailyLogRepository.waterTotalMl(today) }
                 val streakJob = async { dailyLogRepository.currentStreak() }
+                val nutritionJob = async { mealRepository.logsOf(today) }
                 LoadResults(
                     profileJob.await(),
                     targetJob.await(),
                     metricJob.await(),
                     waterJob.await(),
                     streakJob.await(),
+                    nutritionJob.await(),
                 )
             } }
 
@@ -106,11 +121,34 @@ class HomeViewModel @Inject constructor(
                 target = target.getOrNull(),
                 latestMetric = metric.getOrNull(),
                 waterMl = water.getOrDefault(0),
+                caloriesEaten = nutrition.getOrNull()?.calories ?: 0,
                 streakDays = streak.getOrDefault(0),
                 error = failure?.message,
             )
 
+            publishWidgetSnapshot()
             loadBrief(force = false)
+        }
+    }
+
+    /**
+     * Widget ağa çıkmıyor; gördüğü veriyi buradan alıyor. Her Home yüklemesinde
+     * ve su değişiminde tazelenir.
+     */
+    private fun publishWidgetSnapshot() {
+        val s = _state.value
+        viewModelScope.launch {
+            widgetSnapshotStore.write(
+                WidgetData(
+                    name = s.profile?.displayName.orEmpty(),
+                    waterMl = s.waterMl,
+                    waterTargetMl = s.waterTargetMl,
+                    calorieTarget = s.target?.calories ?: 0,
+                    caloriesEaten = s.caloriesEaten,
+                    streakDays = s.streakDays,
+                ),
+            )
+            RepzyWidget().updateAll(appContext)
         }
     }
 
@@ -181,5 +219,7 @@ class HomeViewModel @Inject constructor(
                 error = null,
             )
         }
+        // Su değişti — widget'taki sayı da güncellensin.
+        publishWidgetSnapshot()
     }
 }

@@ -245,4 +245,18 @@
     <string name="settings_delete_word">SİL</string>
     <string name="settings_delete_hint">Onaylamak için %1$s yaz</string>
     <string name="settings_delete_confirm">Kalıcı olarak sil</string>
+    <string name="settings_section_reminders">Hatırlatıcılar</string>
+    <string name="settings_reminder_water">Su hatırlatıcısı</string>
+    <string name="settings_reminder_water_desc">Her gün %1$s</string>
+    <string name="settings_reminder_workout">Antrenman hatırlatıcısı</string>
+    <string name="settings_reminder_workout_desc">Her gün %1$s</string>
+    <string name="settings_notifications_blocked">Repzy için bildirimler kapalı. Hatırlatıcılar için izin vermen gerekiyor.</string>
+    <string name="notif_channel_name">Hatırlatıcılar</string>
+    <string name="notif_channel_desc">Su ve antrenman hatırlatıcıları</string>
+    <string name="notif_water_title">Su içme vakti</string>
+    <string name="notif_water_body">Bir bardak kaydet, serini sürdür.</string>
+    <string name="notif_workout_title">Antrenman vakti</string>
+    <string name="notif_workout_body">20 dakika bile sayılır. Bir seans başlat.</string>
+    <string name="widget_description">Su, kalori ve serin tek bakışta</string>
+    <string name="widget_empty">Planını kurmak için Repzy uygulamasını aç.</string>
 </resources>
