@@ -1,0 +1,10 @@
+# Supabase CLI yapılandırması. project_id gizli değil — URL'de zaten görünüyor.
+project_id = "rngtgvnllrasrmlskzaw"
+
+[functions.analyze-meal]
+# JWT doğrulaması açık: fonksiyon kullanıcı token'ı olmadan çağrılamaz,
+# limit sayacı da o kullanıcının satırlarına RLS ile bağlı.
+verify_jwt = true
+
+[functions.daily-brief]
+verify_jwt = true

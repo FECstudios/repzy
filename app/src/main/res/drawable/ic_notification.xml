@@ -1,0 +1,14 @@
+<!--
+  Bildirim ikonu: durum çubuğunda tek renk maskesi olarak çizilir, bu yüzden
+  düz beyaz ve sade olmalı. Dambıl silueti.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFF">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20.5,10.5h-1v-2c0,-0.55 -0.45,-1 -1,-1s-1,0.45 -1,1v2h-9v-2c0,-0.55 -0.45,-1 -1,-1s-1,0.45 -1,1v2h-1c-0.55,0 -1,0.45 -1,1s0.45,1 1,1h1v2c0,0.55 0.45,1 1,1s1,-0.45 1,-1v-2h9v2c0,0.55 0.45,1 1,1s1,-0.45 1,-1v-2h1c0.55,0 1,-0.45 1,-1S21.05,10.5 20.5,10.5z" />
+</vector>

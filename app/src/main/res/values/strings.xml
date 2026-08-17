@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Repzy</string>
+
+    <!-- Auth -->
+    <string name="auth_tagline">Your training and your nutrition, in one coach.</string>
+    <string name="auth_save_plan_title">Save your plan</string>
+    <string name="auth_save_plan_body">Your plan is ready and stored on this device. Create an account so it is not lost and your progress is tracked.</string>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_sign_up">Create account</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_to_sign_up">No account yet? Create one</string>
+    <string name="auth_to_sign_in">Already have an account? Sign in</string>
+    <string name="auth_confirm_email">Check your inbox to confirm your email address, then sign in.</string>
+    <string name="auth_password_too_short">Password must be at least 8 characters.</string>
+    <string name="auth_email_invalid">Enter a valid email address.</string>
+
+    <!-- Common -->
+    <string name="common_continue">Continue</string>
+    <string name="common_back">Back</string>
+    <string name="common_skip">Skip</string>
+    <string name="common_retry">Retry</string>
+    <string name="error_title">Something went wrong</string>
+    <string name="error_unknown">Could not reach the server. Check your connection and try again.</string>
+    <string name="common_sign_out">Sign out</string>
+
+    <!-- Units -->
+    <string name="unit_cm">cm</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_gram">g</string>
+    <string name="unit_kcal_per_day">kcal / day</string>
+    <string name="unit_liter_per_day">L / day</string>
+
+    <!-- Onboarding -->
+    <string name="onb_consent_title">Before we start</string>
+    <string name="onb_consent_body">To build your plan, Repzy needs your body measurements and goals. Under data-protection law these count as sensitive health data, so we need your explicit consent.</string>
+    <string name="onb_consent_checkbox">I consent to Repzy processing my body measurements and health metrics to create and adapt my training and nutrition plan.</string>
+    <string name="onb_save_plan">Save my plan</string>
+
+    <string name="onb_name_title">What should we call you?</string>
+    <string name="onb_name_label">First name</string>
+
+    <string name="onb_sex_title">Sex and year of birth</string>
+    <string name="onb_sex_why">Calorie and body-fat formulas differ by sex — this is only used for the math.</string>
+    <string name="onb_sex_female">Female</string>
+    <string name="onb_sex_male">Male</string>
+    <string name="onb_birth_year_label">Year of birth</string>
+
+    <string name="onb_body_title">Height and weight</string>
+    <string name="onb_height_label">Height</string>
+    <string name="onb_weight_label">Weight</string>
+
+    <string name="onb_goal_title">What is your goal?</string>
+    <string name="goal_lose_fat">Lose fat</string>
+    <string name="goal_lose_fat_desc">Calorie deficit, keep your muscle</string>
+    <string name="goal_build_muscle">Build muscle</string>
+    <string name="goal_build_muscle_desc">Slight surplus, progressive overload</string>
+    <string name="goal_endurance">Endurance</string>
+    <string name="goal_endurance_desc">Conditioning and stamina</string>
+    <string name="goal_general">General fitness</string>
+    <string name="goal_general_desc">Stay healthy, move regularly</string>
+
+    <string name="onb_experience_title">How much training experience do you have?</string>
+    <string name="level_beginner">Starting from zero</string>
+    <string name="level_beginner_desc">Never trained, or coming back after a long break</string>
+    <string name="level_intermediate">Intermediate</string>
+    <string name="level_intermediate_desc">I know the basic lifts, I train on and off</string>
+    <string name="level_advanced">Advanced</string>
+    <string name="level_advanced_desc">I train consistently and manage my own program</string>
+
+    <string name="onb_equipment_title">Where will you train?</string>
+    <string name="equipment_gym">Gym</string>
+    <string name="equipment_home">At home</string>
+    <string name="equipment_both">Both</string>
+
+    <string name="onb_activity_title">How active is your day?</string>
+    <string name="onb_activity_sub">Not counting workouts — your day-to-day movement.</string>
+    <string name="activity_sedentary">Sedentary</string>
+    <string name="activity_sedentary_desc">Desk job, little walking</string>
+    <string name="activity_light">Lightly active</string>
+    <string name="activity_light_desc">Some walking, 1–2 sessions a week</string>
+    <string name="activity_moderate">Moderately active</string>
+    <string name="activity_moderate_desc">On my feet often, 3–4 sessions a week</string>
+    <string name="activity_active">Active</string>
+    <string name="activity_active_desc">Physical job or 5–6 sessions a week</string>
+    <string name="activity_very_active">Very active</string>
+    <string name="activity_very_active_desc">Heavy physical work or daily training</string>
+
+    <string name="onb_measure_title">Three measurements, no device needed</string>
+    <string name="onb_measure_sub">With a tape measure we can estimate your body fat percentage (US Navy method).</string>
+    <string name="onb_neck_label">Neck</string>
+    <string name="onb_waist_label">Waist</string>
+    <string name="onb_hip_label">Hips</string>
+    <string name="onb_measure_optional">Optional — you can skip this and add it later.</string>
+
+    <string name="calc_title">Building your plan</string>
+    <string name="calc_stage_bmr">Estimating your basal metabolism</string>
+    <string name="calc_stage_tdee">Working out your daily burn</string>
+    <string name="calc_stage_macros">Splitting your macros</string>
+    <string name="calc_stage_plan">Putting your plan together</string>
+    <string name="onb_summary_title">Here is your plan</string>
+    <string name="onb_summary_sub">Calculated from your own numbers. It updates as you progress.</string>
+    <string name="onb_summary_missing">Some information is missing. Go back and complete the steps.</string>
+
+    <!-- Metrics -->
+    <string name="metric_calories">Calories</string>
+    <string name="metric_water">Water</string>
+    <string name="metric_bmi">BMI</string>
+    <string name="metric_body_fat">Body fat</string>
+    <string name="metric_body_fat_navy">US Navy estimate</string>
+    <string name="metric_body_fat_missing">Add measurements</string>
+    <string name="metric_protein">Protein</string>
+    <string name="metric_carbs">Carbs</string>
+    <string name="metric_fat">Fat</string>
+    <string name="metric_bmr_tdee">Basal metabolism %1$d kcal · daily burn %2$d kcal</string>
+    <string name="bmi_underweight">Underweight</string>
+    <string name="bmi_normal">Normal</string>
+    <string name="bmi_overweight">Overweight</string>
+    <string name="bmi_obese">Obese</string>
+
+    <!-- Home -->
+    <string name="home_greeting">Hi %1$s</string>
+    <string name="home_targets_title">Your daily targets</string>
+    <string name="home_water_amount">%1$s / %2$s L</string>
+    <string name="home_add_water">+%1$d ml</string>
+    <string name="home_undo">Undo</string>
+    <string name="home_water_goal_reached">Daily water goal reached.</string>
+    <string name="home_streak">%1$d day streak</string>
+    <string name="home_streak_none">Start today</string>
+    <string name="home_next_up">Progress charts and program suggestions are coming next.</string>
+
+    <!-- Medical disclaimer — wellness framing, required in-app -->
+    <string name="disclaimer_short">Not medical advice. Consult your doctor.</string>
+    <string name="disclaimer_long">Repzy is a wellness and education app. It does not diagnose, treat or prevent any disease. Consult a healthcare professional before changing your training or diet.</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_library">Exercises</string>
+    <string name="library_title">Exercises</string>
+    <string name="library_search_hint">Search an exercise</string>
+    <string name="library_clear_filters">Clear</string>
+    <string name="library_empty">No exercise matches these filters.</string>
+    <string name="library_not_found">Exercise not found.</string>
+    <string name="library_how_to">How to do it</string>
+    <string name="library_common_mistakes">Common mistakes</string>
+    <string name="library_alternatives">Alternatives</string>
+    <string name="library_alternatives_hint">Same movement pattern, different setting or equipment.</string>
+    <string name="library_secondary_muscles">Also works</string>
+    <string name="level_beginner_short">Beginner</string>
+    <string name="muscle_chest">Chest</string>
+    <string name="muscle_lats">Lats</string>
+    <string name="muscle_mid_back">Mid back</string>
+    <string name="muscle_lower_back">Lower back</string>
+    <string name="muscle_front_delts">Front delts</string>
+    <string name="muscle_rear_delts">Rear delts</string>
+    <string name="muscle_biceps">Biceps</string>
+    <string name="muscle_triceps">Triceps</string>
+    <string name="muscle_forearms">Forearms</string>
+    <string name="muscle_quadriceps">Quads</string>
+    <string name="muscle_hamstrings">Hamstrings</string>
+    <string name="muscle_glutes">Glutes</string>
+    <string name="muscle_core">Core</string>
+    <string name="equip_barbell">Barbell</string>
+    <string name="equip_dumbbell">Dumbbell</string>
+    <string name="equip_machine">Machine</string>
+    <string name="equip_cable">Cable</string>
+    <string name="equip_band">Band</string>
+    <string name="equip_bodyweight">Bodyweight</string>
+    <string name="onb_have_account">Already have an account? Sign in</string>
+    <string name="tab_workout">Workout</string>
+    <string name="workout_title">Workout</string>
+    <string name="workout_start">Start a workout</string>
+    <string name="workout_add_exercise">Add exercise</string>
+    <string name="workout_finish">Finish workout</string>
+    <string name="workout_cancel">Cancel workout</string>
+    <string name="workout_discard_hint">Nothing logged yet — this session will not be saved.</string>
+    <string name="workout_elapsed">Time</string>
+    <string name="workout_sets">Sets</string>
+    <string name="workout_volume">Volume</string>
+    <string name="workout_reps">Reps</string>
+    <string name="workout_weight">Weight</string>
+    <string name="workout_duration">Seconds</string>
+    <string name="workout_save_set">Save set</string>
+    <string name="workout_last_time">Last time</string>
+    <string name="workout_effort">How hard was it? (1-10)</string>
+    <string name="workout_history">Past workouts</string>
+    <string name="workout_history_empty">No workouts logged yet.</string>
+    <string name="workout_no_exercises">Add an exercise to get started.</string>
+    <string name="workout_set_line">Set %1$d</string>
+    <string name="workout_reps_short">%1$d reps</string>
+    <string name="workout_seconds_short">%1$d s</string>
+    <string name="workout_pick_exercise">Pick an exercise</string>
+
+    <string name="common_cancel">Cancel</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_close">Close</string>
+
+    <string name="tab_nutrition">Nutrition</string>
+    <string name="nutrition_title">Nutrition</string>
+    <string name="nutrition_take_photo">Take photo</string>
+    <string name="nutrition_pick_photo">Gallery</string>
+    <string name="nutrition_analyzing">Estimating calories from your photo…</string>
+    <string name="nutrition_calories_left">%1$d kcal left</string>
+    <string name="nutrition_scans_left">%1$d photo scans left today</string>
+    <string name="nutrition_empty">Nothing logged today yet. Snap your meal to get an estimate.</string>
+    <string name="nutrition_review_title">Check the estimate</string>
+    <string name="nutrition_review_total">Total: %1$d kcal · P %2$dg · C %3$dg · F %4$dg</string>
+    <string name="nutrition_low_confidence">Low confidence — portion size is hard to judge from the photo. Adjust if it looks off.</string>
+    <string name="nutrition_include">Add back</string>
+    <string name="nutrition_exclude">Remove</string>
+    <string name="nutrition_save">Save to diary</string>
+    <string name="nutrition_estimate_disclaimer">Photo estimates are approximate. Weighing your food is always more accurate.</string>
+
+    <string name="coach_title">Today\'s coach</string>
+    <string name="coach_loading">Reading your data…</string>
+    <string name="coach_refresh">Refresh</string>
+    <string name="coach_refresh_limit">You\'ve used today\'s refreshes — a new brief arrives tomorrow.</string>
+
+    <string name="meal_breakfast">Breakfast</string>
+    <string name="meal_lunch">Lunch</string>
+    <string name="meal_dinner">Dinner</string>
+    <string name="meal_snack">Snack</string>
+    <string name="settings_title">Settings</string>
+    <string name="tab_settings">Settings</string>
+    <string name="settings_section_profile">Your details</string>
+    <string name="settings_section_measurements">Measurements</string>
+    <string name="settings_section_targets">Daily targets</string>
+    <string name="settings_measurements_hint">Saved with the current date. Entering them again today overwrites the entry.</string>
+    <string name="settings_save_profile">Save details</string>
+    <string name="settings_save_measurements">Save measurements</string>
+    <string name="settings_save_targets">Save targets</string>
+    <string name="settings_recalculate">Recalculate my plan</string>
+    <string name="settings_targets_auto">Calculated from your data. Editing a value below switches to manual.</string>
+    <string name="settings_targets_manual">You set these targets manually. Recalculate to go back to the automatic plan.</string>
+    <string name="settings_recalc_title">New plan</string>
+    <string name="settings_recalc_calories">%1$d kcal / day</string>
+    <string name="settings_recalc_water">Water %1$d ml</string>
+    <string name="settings_recalc_body_fat">Body fat estimate %1$s%%</string>
+    <string name="settings_recalc_apply">Use this plan</string>
+    <string name="settings_recalc_missing">Some details are missing — fill in sex, goal, activity, height, weight and year of birth first.</string>
+    <string name="settings_saved_profile">Details saved.</string>
+    <string name="settings_saved_measurements">Measurements saved.</string>
+    <string name="settings_saved_targets">Targets updated.</string>
+    <string name="chart_no_metrics">No measurements yet.</string>
+    <string name="chart_need_two">Two measurements are needed for a chart — it will appear with your next entry.</string>
+    <string name="settings_weight_history">Weight history</string>
+    <string name="settings_section_legal">Legal</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_kvkk_notice">KVKK notice</string>
+    <string name="settings_section_danger">Account</string>
+    <string name="settings_delete_account">Delete my account</string>
+    <string name="settings_delete_body">Deletes your account and every record: profile, measurements, workouts, food and water logs, targets and coaching history. This cannot be undone.</string>
+    <string name="settings_delete_title">Delete account?</string>
+    <string name="settings_delete_warning">All of your data will be deleted immediately and you will be signed out. This cannot be undone.</string>
+    <string name="settings_delete_word">DELETE</string>
+    <string name="settings_delete_hint">Type %1$s to confirm</string>
+    <string name="settings_delete_confirm">Delete permanently</string>
+</resources>

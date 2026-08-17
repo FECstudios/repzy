@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!--
+        Yemek fotoğrafları cache'e yazılır: analiz sonrası saklanmasına gerek yok,
+        sistem yer açması gerektiğinde kendisi siliyor.
+    -->
+    <cache-path
+        name="meal_photos"
+        path="meal_photos/" />
+</paths>
