@@ -16,7 +16,9 @@ import com.repzy.app.data.repo.AiFailure
 import com.repzy.app.data.repo.MealRepository
 import com.repzy.app.data.repo.ProfileRepository
 import com.repzy.app.data.repo.SubscriptionRepository
+import com.repzy.app.data.repo.toUserMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -66,6 +68,7 @@ data class NutritionUiState(
 
 @HiltViewModel
 class NutritionViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val mealRepository: MealRepository,
     private val profileRepository: ProfileRepository,
     private val subscriptionRepository: SubscriptionRepository,
@@ -97,7 +100,7 @@ class NutritionViewModel @Inject constructor(
                     isPremium = premium,
                     day = day.getOrDefault(DayNutrition()),
                     target = target.getOrNull(),
-                    error = day.exceptionOrNull()?.message,
+                    error = day.exceptionOrNull()?.toUserMessage(appContext),
                 )
             }
         }
@@ -116,7 +119,7 @@ class NutritionViewModel @Inject constructor(
 
             encoded
                 .onFailure { e ->
-                    _state.update { it.copy(isAnalyzing = false, error = e.message) }
+                    _state.update { it.copy(isAnalyzing = false, error = e.toUserMessage(appContext)) }
                 }
                 .onSuccess { base64 ->
                     mealRepository
@@ -144,7 +147,7 @@ class NutritionViewModel @Inject constructor(
                             _state.update {
                                 it.copy(
                                     isAnalyzing = false,
-                                    error = e.message,
+                                    error = e.toUserMessage(appContext),
                                     scansRemaining = (e as? AiFailure.DailyLimitReached)
                                         ?.let { 0 } ?: it.scansRemaining,
                                 )
@@ -199,7 +202,10 @@ class NutritionViewModel @Inject constructor(
                 }
                 .onFailure { e ->
                     _state.update {
-                        it.copy(pending = pending.copy(isSaving = false), error = e.message)
+                        it.copy(
+                            pending = pending.copy(isSaving = false),
+                            error = e.toUserMessage(appContext),
+                        )
                     }
                 }
         }
@@ -209,7 +215,7 @@ class NutritionViewModel @Inject constructor(
         viewModelScope.launch {
             mealRepository.deleteLog(id)
                 .onSuccess { load() }
-                .onFailure { e -> _state.update { it.copy(error = e.message) } }
+                .onFailure { e -> _state.update { it.copy(error = e.toUserMessage(appContext)) } }
         }
     }
 

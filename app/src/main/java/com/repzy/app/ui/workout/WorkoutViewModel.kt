@@ -21,6 +21,9 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import javax.inject.Inject
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.repzy.app.data.repo.toUserMessage
 
 /** Seanstaki tek egzersiz: girilen setler + geçen seferin referansı. */
 data class WorkoutEntry(
@@ -60,6 +63,7 @@ data class WorkoutUiState(
 
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val workoutRepository: WorkoutRepository,
     private val exerciseRepository: ExerciseRepository,
     private val profileRepository: ProfileRepository,
@@ -140,7 +144,7 @@ class WorkoutViewModel @Inject constructor(
                     }
                     plan.exercises.forEach { planned -> addExercise(planned.exercise.id) }
                 }
-                .onFailure { e -> _state.update { it.copy(error = e.message) } }
+                .onFailure { e -> _state.update { it.copy(error = e.toUserMessage(appContext)) } }
         }
     }
 
@@ -177,7 +181,7 @@ class WorkoutViewModel @Inject constructor(
                         it.copy(workout = workout, entries = emptyList(), perceivedEffort = null)
                     }
                 }
-                .onFailure { e -> _state.update { it.copy(error = e.message) } }
+                .onFailure { e -> _state.update { it.copy(error = e.toUserMessage(appContext)) } }
         }
     }
 
@@ -250,7 +254,7 @@ class WorkoutViewModel @Inject constructor(
                 }
                 .onFailure { e ->
                     updateEntry(exerciseId) { it.copy(isSaving = false) }
-                    _state.update { it.copy(error = e.message) }
+                    _state.update { it.copy(error = e.toUserMessage(appContext)) }
                 }
         }
     }
@@ -269,7 +273,7 @@ class WorkoutViewModel @Inject constructor(
                         )
                     }
                 }
-                .onFailure { e -> _state.update { it.copy(error = e.message) } }
+                .onFailure { e -> _state.update { it.copy(error = e.toUserMessage(appContext)) } }
         }
     }
 
@@ -302,7 +306,7 @@ class WorkoutViewModel @Inject constructor(
                     load()
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isFinishing = false, error = e.message) }
+                    _state.update { it.copy(isFinishing = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }

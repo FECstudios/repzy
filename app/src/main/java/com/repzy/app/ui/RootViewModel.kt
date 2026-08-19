@@ -22,6 +22,9 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import java.util.Locale
 import javax.inject.Inject
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.repzy.app.data.repo.toUserMessage
 
 enum class AppDestination { LOADING, ONBOARDING, AUTH, PAYWALL, HOME, ERROR }
 
@@ -38,6 +41,7 @@ enum class AppDestination { LOADING, ONBOARDING, AUTH, PAYWALL, HOME, ERROR }
  */
 @HiltViewModel
 class RootViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
     private val draftStore: OnboardingDraftStore,
@@ -160,7 +164,7 @@ class RootViewModel @Inject constructor(
                 draftStore.clear()
             }
             .onFailure { e ->
-                _errorMessage.value = e.message
+                _errorMessage.value = e.toUserMessage(appContext)
                 _destination.value = AppDestination.ERROR
             }
     }
@@ -201,7 +205,7 @@ class RootViewModel @Inject constructor(
                 // En olası sebep: migration'lar Supabase'e uygulanmamış.
                 // Home'u zaten açtıysak orada da aynı hata görünecek, ekranı çalmayalım.
                 if (_destination.value != AppDestination.HOME) {
-                    _errorMessage.value = e.message
+                    _errorMessage.value = e.toUserMessage(appContext)
                     _destination.value = AppDestination.ERROR
                 }
             }

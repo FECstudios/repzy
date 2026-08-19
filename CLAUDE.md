@@ -381,10 +381,11 @@ birebir aynı sayıları verdi ve `nutrition_targets` satırını üzerine yazd�
    kvkk-aydinlatma.html, hesap-silme.html, delete-account.html, index.html).
    Ad, adres ve iletişim e-postası dolduruldu. `core/Legal.kt` içindeki `BASE` artık
    gerçek adres: `https://fecstudios.github.io/repzy/` (depo `FECstudios/repzy`).
-   Kalan iş: (a) **GitHub Pages'i aç** — Settings → Pages → Deploy from a branch,
-   branch `master`, folder `/docs`; açılmadan uygulama içi bağlantılar 404 döner,
-   (b) VERBİS kayıt numarasını `kvkk-aydinlatma.html` içine yazmak,
-   (c) Play Console'a gizlilik politikası + veri silme URL'lerini girmek.
+   ~~GitHub Pages'i aç~~ **YAPILDI** — `https://fecstudios.github.io/repzy/` canlı,
+   dört sayfa da (gizlilik/privacy/hesap-silme/delete-account) 200 dönüyor.
+   Kalan iş: (a) VERBİS kayıt numarasını `kvkk-aydinlatma.html` içine yazmak,
+   (b) Play Console'a gizlilik politikası (`.../gizlilik.html`) + veri silme
+   (`.../hesap-silme.html`) URL'lerini girmek.
    **Metinler avukat kontrolünden geçmeden yayına çıkarılmamalı.**
 2. ~~Gizlilik/KVKK metinlerini üç yeni veri akışıyla güncelle~~ **YAPILDI (18 Ağu 2026)**
    — `gizlilik.html`, `privacy.html`, `kvkk-aydinlatma.html` üçü de güncellendi:
@@ -415,6 +416,42 @@ günde 5 tarama, 2 brief yenileme).
 Sağlayıcılar: e-posta **ve Google** açık. Redirect URLs'te `repzy://login-callback` var.
 Deploy komutu (Docker gerekmez):
 `npx supabase functions deploy <isim> --project-ref rngtgvnllrasrmlskzaw --use-api`
+
+
+### Release derlemesi doğrulandı (19 Ağu 2026)
+İmzalı release APK (R8 + shrinkResources açık) Galaxy A35'te çalıştırıldı:
+açılış, Hilt, Compose, **Supabase postgrest + kotlinx.serialization** ve Play Billing
+bağlantısı sorunsuz. Dex'te 22 `$$serializer` sınıfının hepsi duruyor —
+`proguard-rules.pro` yeterli. Yükleme anahtarı `E:/projects/repzy-upload.jks`
+(local.properties'ten okunuyor, repoya girmiyor); upload key SHA-1:
+`9E:DB:75:D5:70:7E:EF:F2:E9:47:16:B9:54:2A:DB:8A:72:E0:E6:64` — Google Cloud'a
+app signing SHA-1'inin YANINA eklenmeli, yoksa yerel release derlemesinde
+Google girişi çalışmaz.
+
+**Açık kalan hata: koç brief'i `kuzey` hesabında hata veriyor, diğer hesaplarda
+çalışıyor.** Hesaba özgü olması R8'i eleyip sunucu tarafını işaret ediyor —
+muhtemelen `coach_context()` o hesabın verisinde beklenmedik bir şey döndürüyor
+ya da AI cevabı ayrıştırılamıyor. İstemci hatayı yutuyor (`AiFailure.Other("network")`),
+o yüzden gerçek sebep görünmüyor; teşhis için `daily-brief` Edge Function log'larına
+bakmak gerekiyor. Ertelendi.
+
+### verify-purchase (19 Ağu 2026)
+`supabase/functions/verify-purchase/index.ts` yazıldı — premium yetkisini açan tek yol.
+Servis hesabı JWT'siyle Google'dan erişim token'ı alıp Play Developer API'sinin
+`subscriptionsv2` uç noktasına soruyor, sonucu **service_role ile** `subscriptions`
+tablosuna yazıyor (kullanıcının insert politikası yok, yazamaz).
+
+İki güvenlik ayrıntısı:
+- Satın alma `obfuscatedAccountId` ile hesaba bağlanıyor (`BillingRepository`), sunucu
+  da aynı token başka bir `user_id`'ye yazılıysa 409 dönüyor. Fişin ikinci hesapta
+  kullanılmasını iki yerden engelliyoruz.
+- `SUBSCRIPTION_STATE_CANCELED` erişim VERİYOR: Play'de iptal = otomatik yenileme
+  kapatıldı, kullanıcı ödediği dönemin sonuna kadar premium. Migration 0010
+  `is_premium()`'a 'canceled' ekliyor — 0009'daki hâli parasını ödemiş kullanıcıyı
+  iptale bastığı anda ücretsiz katmana düşürüyordu.
+
+Gereken secret'lar: `GOOGLE_SERVICE_ACCOUNT_JSON` (Play Console'a bağlı servis hesabı),
+`ANDROID_PACKAGE_NAME` (varsayılan com.repzy.app). Deploy edilmedi, cihazda denenmedi.
 
 **Migration 0009 (`subscriptions` + `is_premium()`) canlıda YOK** — REST `PGRST205` dönüyor.
 Edge Function'lar `const { data: premium } = await supabase.rpc("is_premium")` yazdığı için

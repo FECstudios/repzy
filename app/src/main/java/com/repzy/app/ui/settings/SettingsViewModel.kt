@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import javax.inject.Inject
+import com.repzy.app.data.repo.toUserMessage
 
 /**
  * Ayarlar ekranının durumu. Sayısal alanlar metin olarak tutuluyor: kullanıcı
@@ -295,7 +296,7 @@ class SettingsViewModel @Inject constructor(
                     onDeleted()
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isDeleting = false, error = e.message) }
+                    _state.update { it.copy(isDeleting = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }
@@ -322,7 +323,7 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isSaving = false, error = e.message) }
+                    _state.update { it.copy(isSaving = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }
@@ -365,7 +366,7 @@ class SettingsViewModel @Inject constructor(
                     load()
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isSaving = false, error = e.message) }
+                    _state.update { it.copy(isSaving = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }
@@ -421,7 +422,7 @@ class SettingsViewModel @Inject constructor(
                     load()
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isSaving = false, error = e.message) }
+                    _state.update { it.copy(isSaving = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }
@@ -451,7 +452,7 @@ class SettingsViewModel @Inject constructor(
                     load()
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isSaving = false, error = e.message) }
+                    _state.update { it.copy(isSaving = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }

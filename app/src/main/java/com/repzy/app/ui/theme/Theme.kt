@@ -15,7 +15,9 @@ private val Green = Color(0xFF2E7D52)
 private val GreenLight = Color(0xFF7BE495)
 private val Ink = Color(0xFF0F1B2A)
 
-private val LightScheme = lightColorScheme(
+// internal: widget'ın kendi renk şeması (RepzyGlanceTheme.kt) aynı marka
+// paletini kullanıyor — cihazın duvar kağıdına göre değişen dinamik renk yerine.
+internal val LightScheme = lightColorScheme(
     primary = Green,
     onPrimary = Color.White,
     primaryContainer = Color(0xFFB8F2C8),
@@ -33,7 +35,7 @@ private val LightScheme = lightColorScheme(
     error = Color(0xFFBA1A1A),
 )
 
-private val DarkScheme = darkColorScheme(
+internal val DarkScheme = darkColorScheme(
     primary = GreenLight,
     onPrimary = Color(0xFF003920),
     primaryContainer = Color(0xFF00522F),

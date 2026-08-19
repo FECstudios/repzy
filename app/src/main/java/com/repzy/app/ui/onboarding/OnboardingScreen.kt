@@ -158,8 +158,10 @@ private fun OnboardingBottomBar(state: OnboardingState, onClick: () -> Unit) {
                 .height(52.dp),
         ) {
             if (state.isSubmitting) {
+                // size, sadece height değil — tek başına yükseklik verilince
+                // gösterge 40dp genişlikte kalıp elips gibi dönüyordu.
                 CircularProgressIndicator(
-                    modifier = Modifier.height(20.dp),
+                    modifier = Modifier.size(20.dp),
                     strokeWidth = 2.dp,
                     color = MaterialTheme.colorScheme.onPrimary,
                 )

@@ -29,6 +29,9 @@ data class WidgetData(
     val waterProgress: Float
         get() = if (waterTargetMl <= 0) 0f else (waterMl.toFloat() / waterTargetMl).coerceIn(0f, 1f)
 
+    val calorieProgress: Float
+        get() = if (calorieTarget <= 0) 0f else (caloriesEaten.toFloat() / calorieTarget).coerceIn(0f, 1f)
+
     val caloriesLeft: Int get() = (calorieTarget - caloriesEaten).coerceAtLeast(0)
 }
 

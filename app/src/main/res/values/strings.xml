@@ -268,6 +268,10 @@
     <string name="notif_workout_body">Even 20 minutes counts. Start a session.</string>
     <string name="widget_description">Water, calories and your streak at a glance</string>
     <string name="widget_empty">Open Repzy to set up your plan.</string>
+    <!-- Kompakt rozet: alev ikonunun yanına sadece sayı. "12 gün" gibi tam
+         cümleye widget'ta yer yok; "12g" gibi bir kısaltma da beslenme
+         gramlarıyla karışırdı. -->
+    <string name="widget_streak_days">%1$d</string>
     <string name="paywall_title">Repzy Premium</string>
     <string name="paywall_subtitle">Unlimited coaching, unlimited photo scans, and a plan that keeps adapting.</string>
     <string name="paywall_benefit_scans">40 photo calorie scans a day instead of 5</string>
@@ -366,4 +370,10 @@
     <string name="photos_consent_body">Body photos count as sensitive personal data, so the consent you gave during onboarding does not cover them. Photos are stored encrypted, only you can view them, they are never sent to the AI, and deleting your account deletes them too.</string>
     <string name="photos_consent_checkbox">I consent to Repzy storing my body photos so I can track my own progress.</string>
     <string name="photos_consent_accept">I consent</string>
+
+    <!-- AiFailure -> kullanici mesaji. Ham istisna metni arayuze CIKMIYOR. -->
+    <string name="error_network">Could not reach the server. Check your connection and try again.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_daily_limit">You have used all scans for today. The limit resets tomorrow.</string>
+    <string name="error_service_busy">The service is busy right now. Try again shortly.</string>
 </resources>

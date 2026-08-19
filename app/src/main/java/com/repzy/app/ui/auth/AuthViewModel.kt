@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.repzy.app.data.repo.toUserMessage
 
 enum class AuthMode { SIGN_IN, SIGN_UP }
 
@@ -33,6 +35,7 @@ data class AuthUiState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val authRepository: AuthRepository,
     private val googleAuthRepository: GoogleAuthRepository,
 ) : ViewModel() {
@@ -79,7 +82,7 @@ class AuthViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isSubmitting = false,
-                            errorMessage = if (cancelled) null else e.message,
+                            errorMessage = if (cancelled) null else e.toUserMessage(appContext),
                         )
                     }
                 }
@@ -122,7 +125,7 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun fail(e: Throwable) = _state.update {
-        it.copy(isSubmitting = false, errorMessage = e.message ?: "Bilinmeyen bir hata oluştu.")
+        it.copy(isSubmitting = false, errorMessage = e.toUserMessage(appContext))
     }
 
     fun consumeInfoMessage() = _state.update { it.copy(infoMessage = null) }

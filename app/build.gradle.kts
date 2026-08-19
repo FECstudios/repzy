@@ -34,6 +34,42 @@ android {
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("GOOGLE_WEB_CLIENT_ID")}\"")
     }
 
+    /*
+     * Yükleme anahtarı local.properties'ten okunur — keystore dosyası da parolalar da
+     * repoya GİRMEZ. Dört alan da doluysa release imzalanır, biri eksikse imzasız
+     * çıkar (build patlamaz ama Play'e yüklenemez).
+     *
+     * Anahtar üretimi (parolaları sen belirle, kimseyle paylaşma):
+     *   keytool -genkeypair -v -keystore repzy-upload.jks -keyalg RSA -keysize 2048 \
+     *     -validity 10000 -alias repzy
+     *
+     * Sonra local.properties'e:
+     *   RELEASE_STORE_FILE=C:/güvenli/bir/yol/repzy-upload.jks
+     *   RELEASE_STORE_PASSWORD=...
+     *   RELEASE_KEY_ALIAS=repzy
+     *   RELEASE_KEY_PASSWORD=...
+     *
+     * Bu dosyanın yedeği kritik: kaybolursa aynı uygulamaya bir daha güncelleme
+     * gönderilemez (Play App Signing kullanılsa bile yükleme anahtarı gerekir).
+     */
+    val storeFilePath = localProp("RELEASE_STORE_FILE")
+    val hasSigning = storeFilePath.isNotBlank() &&
+        localProp("RELEASE_STORE_PASSWORD").isNotBlank() &&
+        localProp("RELEASE_KEY_ALIAS").isNotBlank() &&
+        localProp("RELEASE_KEY_PASSWORD").isNotBlank() &&
+        file(storeFilePath).exists()
+
+    signingConfigs {
+        if (hasSigning) {
+            create("release") {
+                storeFile = file(storeFilePath)
+                storePassword = localProp("RELEASE_STORE_PASSWORD")
+                keyAlias = localProp("RELEASE_KEY_ALIAS")
+                keyPassword = localProp("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -46,6 +82,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            if (hasSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

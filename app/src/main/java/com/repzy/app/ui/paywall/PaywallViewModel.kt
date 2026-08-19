@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.repzy.app.billing.BillingRepository
 import com.repzy.app.billing.PlanOffer
 import com.repzy.app.billing.Products
+import com.repzy.app.data.repo.AuthRepository
 import com.repzy.app.data.repo.SubscriptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.repzy.app.data.repo.toUserMessage
 
 data class PaywallUiState(
     val isLoading: Boolean = true,
@@ -56,8 +60,10 @@ data class PaywallUiState(
 
 @HiltViewModel
 class PaywallViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val billingRepository: BillingRepository,
     private val subscriptionRepository: SubscriptionRepository,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PaywallUiState())
@@ -88,7 +94,7 @@ class PaywallViewModel @Inject constructor(
                     }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isLoading = false, error = e.message, isPremium = premium) }
+                    _state.update { it.copy(isLoading = false, error = e.toUserMessage(appContext), isPremium = premium) }
                 }
         }
     }
@@ -102,7 +108,10 @@ class PaywallViewModel @Inject constructor(
             billingRepository.lastPurchase.collect { purchase ->
                 if (purchase == null) return@collect
                 billingRepository.acknowledge(purchase)
-                subscriptionRepository.reportPurchase(purchase.purchaseToken)
+                subscriptionRepository.reportPurchase(
+                    purchaseToken = purchase.purchaseToken,
+                    productId = purchase.products.firstOrNull(),
+                )
                 refreshPremium()
             }
         }
@@ -114,8 +123,9 @@ class PaywallViewModel @Inject constructor(
         val offer = _state.value.selected ?: return
         _state.update { it.copy(isPurchasing = true, error = null) }
 
-        billingRepository.launchPurchase(activity, offer)
-            .onFailure { e -> _state.update { it.copy(isPurchasing = false, error = e.message) } }
+        // Satın almayı hesaba bağlıyoruz; sunucu da aynı bağı kontrol ediyor.
+        billingRepository.launchPurchase(activity, offer, authRepository.currentUserId)
+            .onFailure { e -> _state.update { it.copy(isPurchasing = false, error = e.toUserMessage(appContext)) } }
             .onSuccess { _state.update { it.copy(isPurchasing = false) } }
     }
 
@@ -125,12 +135,17 @@ class PaywallViewModel @Inject constructor(
             _state.update { it.copy(isPurchasing = true, error = null) }
             billingRepository.activePurchases()
                 .onSuccess { purchases ->
-                    purchases.forEach { subscriptionRepository.reportPurchase(it.purchaseToken) }
+                    purchases.forEach {
+                        subscriptionRepository.reportPurchase(
+                            purchaseToken = it.purchaseToken,
+                            productId = it.products.firstOrNull(),
+                        )
+                    }
                     refreshPremium()
                     _state.update { it.copy(isPurchasing = false) }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isPurchasing = false, error = e.message) }
+                    _state.update { it.copy(isPurchasing = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }

@@ -265,6 +265,7 @@
     <string name="notif_workout_body">Даже 20 минут считаются. Начните сессию.</string>
     <string name="widget_description">Вода, калории и серия — одним взглядом</string>
     <string name="widget_empty">Откройте Repzy, чтобы настроить план.</string>
+    <string name="widget_streak_days">%1$d</string>
     <string name="paywall_title">Repzy Premium</string>
     <string name="paywall_subtitle">Больше сканирований фото, тренер без ограничений и план, который продолжает адаптироваться.</string>
     <string name="paywall_benefit_scans">40 сканирований фото в день вместо 5</string>
@@ -363,4 +364,9 @@
     <string name="photos_consent_body">Фотографии тела относятся к особой категории персональных данных, поэтому согласие, данное при регистрации, их не покрывает. Фото хранятся в зашифрованном виде, видны только вам, никогда не отправляются ИИ и удаляются вместе с аккаунтом.</string>
     <string name="photos_consent_checkbox">Я даю согласие на хранение моих фотографий тела в Repzy, чтобы отслеживать собственный прогресс.</string>
     <string name="photos_consent_accept">Я согласен</string>
+
+    <string name="error_network">Не удалось связаться с сервером. Проверьте соединение и повторите.</string>
+    <string name="error_generic">Что-то пошло не так. Попробуйте ещё раз.</string>
+    <string name="error_daily_limit">Дневной лимит исчерпан. Он обновится завтра.</string>
+    <string name="error_service_busy">Сервис сейчас загружен. Повторите чуть позже.</string>
 </resources>

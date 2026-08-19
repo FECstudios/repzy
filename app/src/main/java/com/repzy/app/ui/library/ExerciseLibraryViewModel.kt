@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.repzy.app.data.repo.toUserMessage
 
 data class LibraryUiState(
     val isLoading: Boolean = true,
@@ -49,6 +52,7 @@ data class LibraryUiState(
 
 @HiltViewModel
 class ExerciseLibraryViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val exerciseRepository: ExerciseRepository,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
@@ -69,7 +73,7 @@ class ExerciseLibraryViewModel @Inject constructor(
                     applyProfileDefaults()
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isLoading = false, error = e.message) }
+                    _state.update { it.copy(isLoading = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }

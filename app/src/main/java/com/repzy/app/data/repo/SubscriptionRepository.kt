@@ -8,7 +8,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Serializable
-private data class PurchaseReport(val purchaseToken: String)
+private data class PurchaseReport(
+    val purchaseToken: String,
+    /** Play cevabında ürün zaten var; bu yalnızca oradan okunamazsa yedek. */
+    val productId: String? = null,
+)
 
 /**
  * Abonelik yetkisi. Tek doğruluk kaynağı sunucu: `is_premium()` RPC'si.
@@ -30,10 +34,13 @@ class SubscriptionRepository @Inject constructor(
      * (doğrulama kurulmadıysa) hata yutulur: kullanıcı akışı kırılmaz, sadece
      * premium açılmaz. Bu bilinçli — doğrulanmamış satın almaya yetki verilmiyor.
      */
-    suspend fun reportPurchase(purchaseToken: String): Result<Unit> = runCatching {
+    suspend fun reportPurchase(
+        purchaseToken: String,
+        productId: String? = null,
+    ): Result<Unit> = runCatching {
         client.functions.invoke(
             function = "verify-purchase",
-            body = PurchaseReport(purchaseToken),
+            body = PurchaseReport(purchaseToken, productId),
         )
         Unit
     }

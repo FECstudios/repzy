@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.repzy.app.data.repo.toUserMessage
 
 /**
  * Karşılaştırma seçimi. İki fotoğraf seçilince slider açılıyor; tarih sırasına
@@ -46,6 +48,7 @@ data class BodyPhotosUiState(
 
 @HiltViewModel
 class BodyPhotosViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val repository: BodyPhotoRepository,
 ) : ViewModel() {
 
@@ -74,7 +77,7 @@ class BodyPhotosViewModel @Inject constructor(
                     refreshUrls(photos)
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isLoading = false, hasConsent = true, error = e.message) }
+                    _state.update { it.copy(isLoading = false, hasConsent = true, error = e.toUserMessage(appContext)) }
                 }
         }
     }
@@ -93,7 +96,7 @@ class BodyPhotosViewModel @Inject constructor(
         viewModelScope.launch {
             repository.grantConsent()
                 .onSuccess { load() }
-                .onFailure { e -> _state.update { it.copy(error = e.message) } }
+                .onFailure { e -> _state.update { it.copy(error = e.toUserMessage(appContext)) } }
         }
     }
 
@@ -114,7 +117,7 @@ class BodyPhotosViewModel @Inject constructor(
                     load()
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isUploading = false, error = e.message) }
+                    _state.update { it.copy(isUploading = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }
@@ -159,7 +162,7 @@ class BodyPhotosViewModel @Inject constructor(
                     }
                     load()
                 }
-                .onFailure { e -> _state.update { it.copy(error = e.message) } }
+                .onFailure { e -> _state.update { it.copy(error = e.toUserMessage(appContext)) } }
         }
     }
 

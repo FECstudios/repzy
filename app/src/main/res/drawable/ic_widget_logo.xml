@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Widget başlığındaki marka işareti. ic_launcher_foreground.xml'deki halter
+  geometrisinin aynısı, adaptive icon'un geniş güvenli alanı çıkarılıp
+  dar bir viewport'a (58x24) sığdırılmış hâli — küçük boyutta net görünsün diye.
+  İkon değişirse buradaki koordinatlar da değişmeli.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="22dp"
+    android:height="9dp"
+    android:viewportWidth="58"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#7BE495"
+        android:pathData="M15,8h28v8h-28z" />
+    <path
+        android:fillColor="#7BE495"
+        android:pathData="M7,0h7v24h-7z" />
+    <path
+        android:fillColor="#7BE495"
+        android:pathData="M44,0h7v24h-7z" />
+    <path
+        android:fillColor="#4FB477"
+        android:pathData="M0,4h6v16h-6z" />
+    <path
+        android:fillColor="#4FB477"
+        android:pathData="M52,4h6v16h-6z" />
+</vector>

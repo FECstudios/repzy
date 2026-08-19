@@ -157,8 +157,19 @@ class BillingRepository @Inject constructor(
         offers
     }
 
-    /** Play'in satın alma ekranını açar. Sonuç [lastPurchase] üzerinden gelir. */
-    fun launchPurchase(activity: Activity, offer: PlanOffer): Result<Unit> = runCatching {
+    /**
+     * Play'in satın alma ekranını açar. Sonuç [lastPurchase] üzerinden gelir.
+     *
+     * [accountId]: satın almayı hesaba bağlıyor. Play bunu `obfuscatedExternalAccountId`
+     * olarak saklıyor; olmadan bir satın alma fişi başka bir Repzy hesabında
+     * "benim" diye gösterilebilirdi. Sunucu tarafında da token-hesap bağı
+     * kontrol ediliyor, bu ilk savunma hattı.
+     */
+    fun launchPurchase(
+        activity: Activity,
+        offer: PlanOffer,
+        accountId: String?,
+    ): Result<Unit> = runCatching {
         val details = cachedDetails ?: error("Plan bilgisi yüklenmedi.")
 
         val params = BillingFlowParams.newBuilder()
@@ -170,6 +181,11 @@ class BillingRepository @Inject constructor(
                         .build(),
                 ),
             )
+            .apply {
+                // Play ham kullanıcı kimliği istemiyor; uuid zaten opak ama
+                // yine de 64 karakter sınırına uyuyoruz.
+                accountId?.take(64)?.let { setObfuscatedAccountId(it) }
+            }
             .build()
 
         val result = client.launchBillingFlow(activity, params)

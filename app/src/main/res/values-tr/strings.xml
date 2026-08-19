@@ -259,6 +259,7 @@
     <string name="notif_workout_body">20 dakika bile sayılır. Bir seans başlat.</string>
     <string name="widget_description">Su, kalori ve serin tek bakışta</string>
     <string name="widget_empty">Planını kurmak için Repzy uygulamasını aç.</string>
+    <string name="widget_streak_days">%1$d</string>
     <string name="paywall_title">Repzy Premium</string>
     <string name="paywall_subtitle">Sınırsız koçluk, çok daha fazla fotoğraf taraması ve seninle gelişmeye devam eden bir plan.</string>
     <string name="paywall_benefit_scans">Günde 5 yerine 40 fotoğraf taraması</string>
@@ -357,4 +358,9 @@
     <string name="photos_consent_body">Vücut fotoğrafı özel nitelikli kişisel veridir; bu yüzden başlangıçta verdiğin rıza bunu kapsamaz. Fotoğraflar şifreli saklanır, yalnızca sen görürsün, AI\'ya hiç gönderilmez ve hesabını silince onlar da silinir.</string>
     <string name="photos_consent_checkbox">Kendi ilerlememi takip edebilmem için vücut fotoğraflarımın Repzy tarafından saklanmasına açık rıza veriyorum.</string>
     <string name="photos_consent_accept">Açık rıza veriyorum</string>
+
+    <string name="error_network">Sunucuya ulaşılamadı. Bağlantını kontrol edip tekrar dene.</string>
+    <string name="error_generic">Bir şeyler ters gitti. Tekrar dene.</string>
+    <string name="error_daily_limit">Bugünkü hakkını kullandın. Yarın sıfırlanıyor.</string>
+    <string name="error_service_busy">Servis şu an yoğun. Birazdan tekrar dene.</string>
 </resources>

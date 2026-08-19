@@ -3,17 +3,22 @@ package com.repzy.app.widget
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
@@ -21,6 +26,7 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -42,7 +48,8 @@ class RepzyWidget : GlanceAppWidget() {
         val data = readWidgetData(context)
 
         provideContent {
-            GlanceTheme {
+            // Sistemin duvar kağıdına göre değişen dinamik renk yerine sabit marka paleti.
+            GlanceTheme(colors = RepzyGlanceColors) {
                 WidgetContent(context, data)
             }
         }
@@ -55,78 +62,133 @@ private fun WidgetContent(context: Context, data: WidgetData) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(GlanceTheme.colors.widgetBackground)
-            .cornerRadius(20.dp)
-            .padding(14.dp)
+            .cornerRadius(24.dp)
+            .padding(16.dp)
             .clickable(actionStartActivity<MainActivity>()),
     ) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Image(
+                provider = ImageProvider(R.drawable.ic_widget_logo),
+                contentDescription = null,
+                modifier = GlanceModifier.width(22.dp).height(9.dp),
+            )
+            Spacer(GlanceModifier.width(8.dp))
             Text(
                 text = context.getString(R.string.app_name),
                 style = TextStyle(
-                    color = GlanceTheme.colors.primary,
-                    fontSize = 13.sp(),
+                    color = GlanceTheme.colors.onSurface,
+                    fontSize = 14.sp(),
                     fontWeight = FontWeight.Bold,
                 ),
                 modifier = GlanceModifier.defaultWeight(),
             )
             if (data.streakDays > 0) {
-                Text(
-                    text = context.getString(R.string.home_streak, data.streakDays),
-                    style = TextStyle(
-                        color = GlanceTheme.colors.onSurfaceVariant,
-                        fontSize = 12.sp(),
-                    ),
-                )
+                StreakBadge(context, data.streakDays)
             }
         }
 
-        Spacer(GlanceModifier.height(8.dp))
+        Spacer(GlanceModifier.height(14.dp))
 
         // Veri hiç yazılmamışsa (kullanıcı henüz girmemiş) boş sayı göstermek yerine davet et.
         if (data.waterTargetMl <= 0 && data.calorieTarget <= 0) {
-            Text(
-                text = context.getString(R.string.widget_empty),
-                style = TextStyle(
-                    color = GlanceTheme.colors.onSurface,
-                    fontSize = 13.sp(),
-                ),
-            )
-            return@Column
-        }
-
-        Row(modifier = GlanceModifier.fillMaxWidth()) {
-            Stat(
+            EmptyState(context)
+        } else {
+            StatRow(
+                icon = R.drawable.ic_widget_water,
                 label = context.getString(R.string.metric_water),
                 value = "${liters(data.waterMl)} / ${liters(data.waterTargetMl)} L",
+                progress = data.waterProgress,
             )
-            Spacer(GlanceModifier.width(12.dp))
-            Stat(
+            Spacer(GlanceModifier.height(12.dp))
+            StatRow(
+                icon = R.drawable.ic_widget_flame,
                 label = context.getString(R.string.metric_calories),
                 value = "${data.caloriesLeft} kcal",
+                progress = data.calorieProgress,
             )
         }
     }
 }
 
 @Composable
-private fun Stat(label: String, value: String) {
-    Column {
+private fun StreakBadge(context: Context, days: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = GlanceModifier
+            .background(GlanceTheme.colors.primaryContainer)
+            .cornerRadius(20.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Image(
+            provider = ImageProvider(R.drawable.ic_widget_flame),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(GlanceTheme.colors.onPrimaryContainer),
+            modifier = GlanceModifier.size(12.dp),
+        )
+        Spacer(GlanceModifier.width(4.dp))
         Text(
-            text = label,
+            text = context.getString(R.string.widget_streak_days, days),
             style = TextStyle(
-                color = GlanceTheme.colors.onSurfaceVariant,
-                fontSize = 11.sp(),
+                color = GlanceTheme.colors.onPrimaryContainer,
+                fontSize = 12.sp(),
+                fontWeight = FontWeight.Bold,
             ),
         )
+    }
+}
+
+@Composable
+private fun StatRow(icon: Int, label: String, value: String, progress: Float) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = GlanceModifier.fillMaxWidth()) {
+        Image(
+            provider = ImageProvider(icon),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(GlanceTheme.colors.primary),
+            modifier = GlanceModifier.size(16.dp),
+        )
+        Spacer(GlanceModifier.width(8.dp))
+        Column(modifier = GlanceModifier.defaultWeight()) {
+            Row(modifier = GlanceModifier.fillMaxWidth()) {
+                Text(
+                    text = label,
+                    style = TextStyle(
+                        color = GlanceTheme.colors.onSurfaceVariant,
+                        fontSize = 11.sp(),
+                    ),
+                    modifier = GlanceModifier.defaultWeight(),
+                )
+                Text(
+                    text = value,
+                    style = TextStyle(
+                        color = GlanceTheme.colors.onSurface,
+                        fontSize = 13.sp(),
+                        fontWeight = FontWeight.Bold,
+                    ),
+                )
+            }
+            Spacer(GlanceModifier.height(6.dp))
+            LinearProgressIndicator(
+                modifier = GlanceModifier.fillMaxWidth().height(6.dp).cornerRadius(3.dp),
+                progress = progress,
+                color = GlanceTheme.colors.primary,
+                backgroundColor = GlanceTheme.colors.surfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyState(context: Context) {
+    Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text = value,
+            text = context.getString(R.string.widget_empty),
             style = TextStyle(
-                color = GlanceTheme.colors.onSurface,
-                fontSize = 16.sp(),
-                fontWeight = FontWeight.Bold,
+                color = GlanceTheme.colors.onSurfaceVariant,
+                fontSize = 13.sp(),
+                textAlign = androidx.glance.text.TextAlign.Center,
             ),
         )
     }

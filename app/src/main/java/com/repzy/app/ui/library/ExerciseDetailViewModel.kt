@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.repzy.app.data.repo.toUserMessage
 
 data class ExerciseDetailUiState(
     val isLoading: Boolean = true,
@@ -23,6 +26,7 @@ data class ExerciseDetailUiState(
 
 @HiltViewModel
 class ExerciseDetailViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val exerciseRepository: ExerciseRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -45,7 +49,7 @@ class ExerciseDetailViewModel @Inject constructor(
                     )
                 }
                 .onFailure { e ->
-                    _state.value = ExerciseDetailUiState(isLoading = false, error = e.message)
+                    _state.value = ExerciseDetailUiState(isLoading = false, error = e.toUserMessage(appContext))
                 }
         }
     }

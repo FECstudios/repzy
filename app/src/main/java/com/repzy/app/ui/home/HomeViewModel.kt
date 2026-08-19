@@ -17,6 +17,7 @@ import com.repzy.app.data.repo.DailyLogRepository
 import com.repzy.app.data.repo.MealRepository
 import com.repzy.app.data.repo.ProfileRepository
 import com.repzy.app.data.repo.SubscriptionRepository
+import com.repzy.app.data.repo.toUserMessage
 import com.repzy.app.health.HealthConnectRepository
 import com.repzy.app.health.HealthSnapshot
 import androidx.glance.appwidget.updateAll
@@ -212,7 +213,9 @@ class HomeViewModel @Inject constructor(
                     _state.update { it.copy(brief = brief, isBriefLoading = false) }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isBriefLoading = false, briefError = e.message) }
+                    _state.update {
+                        it.copy(isBriefLoading = false, briefError = e.toUserMessage(appContext))
+                    }
                 }
         }
     }
@@ -259,7 +262,11 @@ class HomeViewModel @Inject constructor(
                 .onSuccess { refreshWaterAndStreak() }
                 .onFailure { e ->
                     _state.update {
-                        it.copy(waterMl = previous, isWaterUpdating = false, error = e.message)
+                        it.copy(
+                            waterMl = previous,
+                            isWaterUpdating = false,
+                            error = e.toUserMessage(appContext),
+                        )
                     }
                 }
         }
@@ -273,7 +280,7 @@ class HomeViewModel @Inject constructor(
             dailyLogRepository.removeLastWater(today)
                 .onSuccess { refreshWaterAndStreak() }
                 .onFailure { e ->
-                    _state.update { it.copy(isWaterUpdating = false, error = e.message) }
+                    _state.update { it.copy(isWaterUpdating = false, error = e.toUserMessage(appContext)) }
                 }
         }
     }

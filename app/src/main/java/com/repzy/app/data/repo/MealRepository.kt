@@ -34,27 +34,11 @@ class MealRepository @Inject constructor(
         mimeType: String = "image/jpeg",
         locale: String = "tr",
     ): Result<MealAnalysis> = runCatching {
-        val response = client.functions.invoke(
+        val text = client.invokeEdgeFunction(
             function = "analyze-meal",
             body = MealAnalysisRequest(imageBase64, mimeType, locale),
+            json = json,
         )
-
-        val text = response.bodyAsText()
-        if (response.status != HttpStatusCode.OK) {
-            val error = runCatching {
-                json.decodeFromString<EdgeFunctionError>(text)
-            }.getOrNull()
-
-            throw when (error?.error) {
-                "daily_limit_reached" -> AiFailure.DailyLimitReached(
-                    limit = error.limit ?: 0,
-                    used = error.used ?: 0,
-                )
-                "ai_quota_exhausted" -> AiFailure.ProviderQuotaExhausted
-                else -> AiFailure.Other(error?.error ?: response.status.value.toString())
-            }
-        }
-
         json.decodeFromString<MealAnalysis>(text)
     }
 

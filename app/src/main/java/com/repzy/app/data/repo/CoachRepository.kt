@@ -3,11 +3,7 @@ package com.repzy.app.data.repo
 import com.repzy.app.data.model.DailyBrief
 import com.repzy.app.data.model.DailyBriefRequest
 import com.repzy.app.data.model.DeviceActivity
-import com.repzy.app.data.model.EdgeFunctionError
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.functions.functions
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,27 +24,11 @@ class CoachRepository @Inject constructor(
         activity: DeviceActivity? = null,
     ): Result<DailyBrief> =
         runCatching {
-            val response = client.functions.invoke(
+            val text = client.invokeEdgeFunction(
                 function = "daily-brief",
                 body = DailyBriefRequest(force = force, locale = locale, activity = activity),
+                json = json,
             )
-
-            val text = response.bodyAsText()
-            if (response.status != HttpStatusCode.OK) {
-                val error = runCatching {
-                    json.decodeFromString<EdgeFunctionError>(text)
-                }.getOrNull()
-
-                throw when (error?.error) {
-                    "daily_limit_reached" -> AiFailure.DailyLimitReached(
-                        limit = error.limit ?: 0,
-                        used = error.used ?: 0,
-                    )
-                    "ai_quota_exhausted" -> AiFailure.ProviderQuotaExhausted
-                    else -> AiFailure.Other(error?.error ?: response.status.value.toString())
-                }
-            }
-
             json.decodeFromString<DailyBrief>(text)
         }
 }
