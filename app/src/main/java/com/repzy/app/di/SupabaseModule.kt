@@ -43,6 +43,11 @@ object SupabaseModule {
                 flowType = FlowType.PKCE
                 autoLoadFromStorage = true
                 alwaysAutoRefresh = true
+                // E-posta dogrulama / sifre sifirlama baglantisi uygulamaya boyle doner.
+                // Supabase panelinde ayni adres "Redirect URLs" listesine eklenmeli:
+                //   repzy://login-callback
+                scheme = "repzy"
+                host = "login-callback"
             }
             install(Postgrest)
             install(Storage)

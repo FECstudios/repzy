@@ -17,6 +17,9 @@ import com.repzy.app.data.model.Profile
 import com.repzy.app.data.model.Sex
 import com.repzy.app.data.local.ReminderPrefs
 import com.repzy.app.data.local.ReminderSettings
+import com.repzy.app.data.local.UiPrefs
+import com.repzy.app.health.HealthAvailability
+import com.repzy.app.health.HealthConnectRepository
 import com.repzy.app.data.repo.ProfileRepository
 import com.repzy.app.notifications.Reminders
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -70,6 +73,8 @@ data class SettingsUiState(
     val error: String? = null,
     val reminders: ReminderSettings = ReminderSettings(),
     val notificationsBlocked: Boolean = false,
+    val advancedTracking: Boolean = false,
+    val healthAvailability: HealthAvailability = HealthAvailability.UNSUPPORTED,
     val isDeleteDialogOpen: Boolean = false,
     val deleteConfirmation: String = "",
     val isDeleting: Boolean = false,
@@ -109,6 +114,8 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val profileRepository: ProfileRepository,
     private val reminderPrefs: ReminderPrefs,
+    private val uiPrefs: UiPrefs,
+    private val healthRepository: HealthConnectRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
@@ -163,6 +170,8 @@ class SettingsViewModel @Inject constructor(
                 error = profile.exceptionOrNull()?.message,
                 reminders = reminderPrefs.load(),
                 notificationsBlocked = !Reminders.hasPermission(appContext),
+                advancedTracking = uiPrefs.isAdvancedTracking() && healthRepository.hasPermissions(),
+                healthAvailability = healthRepository.availability(),
             )
         }
     }
@@ -171,6 +180,31 @@ class SettingsViewModel @Inject constructor(
      * Hatırlatıcı anahtarı. Tercih DataStore'a yazılıyor, planlama WorkManager'a
      * devrediliyor — uygulama kapalıyken de çalışması gerekiyor.
      */
+    /** Health Connect izin kumesi — ekran izin diyalogunu bununla aciyor. */
+    val healthPermissions: Set<String> get() = healthRepository.permissions
+
+    /**
+     * Gelismis takip. Kapatmak yerel tercihi kapatir; Health Connect izinleri
+     * sistemde kalir (onlari kullanici Health Connect uygulamasindan geri alir).
+     * Bunu arayuzde acikca yaziyoruz, sessizce birakmiyoruz.
+     */
+    fun setAdvancedTracking(enabled: Boolean) {
+        viewModelScope.launch {
+            uiPrefs.setAdvancedTracking(enabled)
+            val granted = enabled && healthRepository.hasPermissions()
+            _state.update { it.copy(advancedTracking = granted) }
+        }
+    }
+
+    /** Izin diyalogu kapandiktan sonra gercekten verildi mi diye bakiyoruz. */
+    fun refreshHealthPermission() {
+        viewModelScope.launch {
+            val granted = healthRepository.hasPermissions()
+            if (granted) uiPrefs.setAdvancedTracking(true)
+            _state.update { it.copy(advancedTracking = granted) }
+        }
+    }
+
     fun setWaterReminder(enabled: Boolean) {
         viewModelScope.launch {
             reminderPrefs.setWater(enabled)

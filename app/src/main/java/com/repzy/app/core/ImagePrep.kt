@@ -10,15 +10,20 @@ import androidx.exifinterface.media.ExifInterface
 import java.io.ByteArrayOutputStream
 
 /**
- * Yemek fotoğrafını AI'ya göndermeye hazırlar.
+ * Telefon fotoğrafını göndermeye/saklamaya hazırlar.
  *
  * Ham telefon fotoğrafı 4–8 MB; vision maliyeti ve yükleme süresi doğrudan
- * boyuta bağlı olduğu için uzun kenarı [MAX_EDGE_PX]'e indirip JPEG'e çeviriyoruz.
- * 1024 px, yemek tanımak için fazlasıyla yeterli.
+ * boyuta bağlı olduğu için uzun kenarı küçültüp JPEG'e çeviriyoruz.
+ * Yemek için [MAX_EDGE_PX] (1024 px) tanımaya fazlasıyla yeter; vücut fotoğrafı
+ * aylar sonra yan yana karşılaştırılacağı için [BODY_MAX_EDGE_PX] ile biraz daha büyük.
  */
 object ImagePrep {
 
     const val MAX_EDGE_PX = 1024
+
+    /** Karşılaştırma slider'ında tam ekran gösterildiği için daha yüksek çözünürlük. */
+    const val BODY_MAX_EDGE_PX = 1440
+
     private const val JPEG_QUALITY = 82
 
     /** Edge Function'ın kabul ettiği base64 üst sınırıyla aynı — orada 413 dönmesin. */
@@ -29,8 +34,7 @@ object ImagePrep {
      * Çok büyük kalırsa kaliteyi düşürerek tekrar dener.
      */
     fun toBase64Jpeg(context: Context, uri: Uri): Result<String> = runCatching {
-        val bitmap = decodeScaled(context, uri) ?: error("Fotoğraf okunamadı.")
-        val oriented = applyExifRotation(context, uri, bitmap)
+        val oriented = decodeOriented(context, uri, MAX_EDGE_PX)
 
         var quality = JPEG_QUALITY
         var encoded = encode(oriented, quality)
@@ -45,6 +49,28 @@ object ImagePrep {
         encoded
     }
 
+    /**
+     * Storage'a yüklenecek JPEG. Base64'e çevirmiyoruz: yükleme ham bayt kabul
+     * ediyor, base64 boşuna %33 şişirirdi.
+     */
+    fun toJpegBytes(
+        context: Context,
+        uri: Uri,
+        maxEdgePx: Int = BODY_MAX_EDGE_PX,
+    ): Result<ByteArray> = runCatching {
+        val oriented = decodeOriented(context, uri, maxEdgePx)
+        val stream = ByteArrayOutputStream()
+        oriented.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, stream)
+        oriented.recycle()
+        stream.toByteArray()
+    }
+
+    /** Ölçekli okuma + EXIF düzeltmesi — iki yolun da ortak ilk adımı. */
+    private fun decodeOriented(context: Context, uri: Uri, maxEdgePx: Int): Bitmap {
+        val bitmap = decodeScaled(context, uri, maxEdgePx) ?: error("Fotoğraf okunamadı.")
+        return applyExifRotation(context, uri, bitmap)
+    }
+
     private fun encode(bitmap: Bitmap, quality: Int): String {
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
@@ -52,7 +78,7 @@ object ImagePrep {
     }
 
     /** inSampleSize ile okur: tam boyutu belleğe hiç almadan küçültür. */
-    private fun decodeScaled(context: Context, uri: Uri): Bitmap? {
+    private fun decodeScaled(context: Context, uri: Uri, maxEdgePx: Int): Bitmap? {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         context.contentResolver.openInputStream(uri)?.use {
             BitmapFactory.decodeStream(it, null, bounds)
@@ -61,8 +87,8 @@ object ImagePrep {
 
         var sample = 1
         while (
-            bounds.outWidth / (sample * 2) >= MAX_EDGE_PX ||
-            bounds.outHeight / (sample * 2) >= MAX_EDGE_PX
+            bounds.outWidth / (sample * 2) >= maxEdgePx ||
+            bounds.outHeight / (sample * 2) >= maxEdgePx
         ) {
             sample *= 2
         }
@@ -73,9 +99,9 @@ object ImagePrep {
         } ?: return null
 
         val longEdge = maxOf(decoded.width, decoded.height)
-        if (longEdge <= MAX_EDGE_PX) return decoded
+        if (longEdge <= maxEdgePx) return decoded
 
-        val scale = MAX_EDGE_PX.toFloat() / longEdge
+        val scale = maxEdgePx.toFloat() / longEdge
         val scaled = Bitmap.createScaledBitmap(
             decoded,
             (decoded.width * scale).toInt().coerceAtLeast(1),

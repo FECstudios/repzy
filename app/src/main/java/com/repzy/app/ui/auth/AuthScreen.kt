@@ -25,6 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -58,6 +61,7 @@ fun AuthScreen(
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     // "Hesabım var" diyerek gelindiyse kayıt değil giriş formu açılır.
@@ -220,6 +224,35 @@ fun AuthScreen(
                             },
                         ),
                     )
+                }
+            }
+
+            if (viewModel.googleAvailable) {
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    HorizontalDivider(Modifier.weight(1f))
+                    Text(
+                        text = stringResource(R.string.auth_or),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                    )
+                    HorizontalDivider(Modifier.weight(1f))
+                }
+                Spacer(Modifier.height(12.dp))
+
+                // Sistem hesap secici aciliyor; kullanici uygulamadan cikmiyor.
+                OutlinedButton(
+                    onClick = { viewModel.signInWithGoogle(context) },
+                    enabled = !state.isSubmitting,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                ) {
+                    Text(stringResource(R.string.auth_google))
                 }
             }
 

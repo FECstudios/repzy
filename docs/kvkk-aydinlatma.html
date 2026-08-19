@@ -13,7 +13,7 @@
 
 <main>
 <h1>Kişisel Verilerin İşlenmesine İlişkin Aydınlatma Metni</h1>
-<p class="muted">6698 sayılı KVKK Md. 10 kapsamında · Son güncelleme: 17 Ağustos 2026</p>
+<p class="muted">6698 sayılı KVKK Md. 10 kapsamında · Son güncelleme: 18 Ağustos 2026</p>
 
 <div class="card">
   <p>Bu metin, Repzy uygulamasını kullanırken hangi kişisel verilerinin, hangi amaçla,
@@ -35,12 +35,15 @@
   <tr><th>Kategori</th><th>Veriler</th></tr>
   <tr>
     <td>Kimlik ve iletişim</td>
-    <td>Ad (hitap için), e-posta adresi</td>
+    <td>Ad (hitap için), e-posta adresi. "Google ile devam et" seçilirse ad ve e-posta
+    adresi Google tarafından doğrulanmış olarak iletilir.</td>
   </tr>
   <tr>
     <td><strong>Özel nitelikli kişisel veri — sağlık verisi</strong> (Md. 6)</td>
     <td>Cinsiyet, doğum yılı, boy, kilo, çevre ölçüleri (boyun, bel, kalça), vücut yağı
-    tahmini, antrenman kayıtları, yemek ve su tüketim kayıtları</td>
+    tahmini, antrenman kayıtları, yemek ve su tüketim kayıtları. Gelişmiş takip
+    açılırsa: bağlı sağlık uygulamasından (Health Connect) okunan adım sayısı, aktif
+    kalori ve antrenman süresi.</td>
   </tr>
   <tr>
     <td>İşlem güvenliği</td>
@@ -48,7 +51,9 @@
   </tr>
   <tr>
     <td>Görsel veri</td>
-    <td>Yemek fotoğrafı — yalnızca analiz anında işlenir, saklanmaz</td>
+    <td>Yemek fotoğrafı — yalnızca analiz anında işlenir, saklanmaz.
+    <strong>Vücut fotoğrafı</strong> (ön/yan/arka) — özel nitelikli veri sayılır,
+    yüklenirse saklanır, yapay zekâya gönderilmez.</td>
   </tr>
 </table>
 
@@ -59,6 +64,9 @@
   <li>Antrenman ve beslenme takibinin yapılması, ilerlemenin gösterilmesi</li>
   <li>Yemek fotoğrafından besin değeri tahmini yapılması</li>
   <li>Geçmiş verine göre günlük antrenman/beslenme önerisi üretilmesi</li>
+  <li>Bağlı sağlık uygulamasından okunan günlük aktivitenin gösterilmesi ve günlük
+      koç önerisinin bu veriye göre şekillendirilmesi</li>
+  <li>Yüklediğin vücut fotoğraflarının saklanması ve zaman içinde karşılaştırılması</li>
   <li>Ücretsiz kullanım limitlerinin uygulanması (kötüye kullanımın önlenmesi)</li>
 </ul>
 
@@ -70,6 +78,10 @@
     <td>Md. 5/2-c — sözleşmenin kurulması ve ifası için zorunlu olması</td>
   </tr>
   <tr>
+    <td>Google hesabından gelen ad ve e-posta</td>
+    <td>Md. 5/2-c — sözleşmenin kurulması ve ifası (giriş yöntemini seçmen)</td>
+  </tr>
+  <tr>
     <td>Sağlık verisi niteliğindeki tüm ölçü ve takip verileri</td>
     <td><strong>Md. 6/2 — açık rıza.</strong> Uygulamanın ilk adımında ayrı bir onay
     kutusuyla alınır, genel kullanım koşullarına gömülmez.</td>
@@ -77,6 +89,18 @@
   <tr>
     <td>Yemek fotoğrafı</td>
     <td>Md. 6/2 — açık rıza (fotoğrafı çekip göndermeyi seçmen)</td>
+  </tr>
+  <tr>
+    <td>Vücut fotoğrafı</td>
+    <td><strong>Md. 6/2 — ayrı açık rıza.</strong> İlerleme fotoğrafları ekranında,
+    onboarding rızasından bağımsız ikinci bir onay kutusuyla alınır. Rıza verilmeden
+    fotoğraf yükleme düğmeleri gösterilmez.</td>
+  </tr>
+  <tr>
+    <td>Bağlı sağlık uygulamasından okunan aktivite verisi</td>
+    <td><strong>Md. 6/2 — ayrı açık rıza.</strong> Ayarlar'daki gelişmiş takip
+    anahtarını açmanla verilir; anahtar kapalıyken hiçbir veri okunmaz. Ayrıca
+    Health Connect'in kendi izin ekranından da onay gerekir.</td>
   </tr>
 </table>
 
@@ -88,11 +112,21 @@
   dayanır</strong> (Md. 9). Verilerin reklam, pazarlama veya profilleme amacıyla
   hiçbir üçüncü tarafa aktarılmaz, satılmaz.
 </p>
+<p>
+  Yapay zekâ sağlayıcısına <strong>ne gittiğini</strong> ayrıca belirtmek gerekir:
+  yemek fotoğrafı analizinde yalnızca o fotoğraf; günlük koç önerisinde ise sayısal
+  özet (hedefler, günlük toplamlar, antrenman sayısı) ve — gelişmiş takip açıksa —
+  <strong>bağlı sağlık uygulamasından okunan adım, aktif kalori ve antrenman süresi</strong>
+  gönderilir. <strong>Adın, e-posta adresin ve vücut fotoğrafların yapay zekâ
+  sağlayıcısına hiçbir durumda gönderilmez.</strong>
+</p>
 
 <h2>6. Saklama süresi</h2>
 <p>
   Veriler hesabın aktif olduğu süre boyunca saklanır. Hesabını sildiğinde veritabanından
-  anında, teknik yedeklerden en fazla 30 gün içinde silinir.
+  ve dosya depolamasından (yüklediğin vücut fotoğrafları dâhil) anında, teknik yedeklerden
+  en fazla 30 gün içinde silinir. Bağlı sağlık uygulamasından okunan adım ve aktif kalori
+  değerleri sunucuda hiç saklanmaz; her açılışta yeniden okunur.
 </p>
 
 <h2>7. Md. 11 kapsamındaki haklarınız</h2>
@@ -120,9 +154,31 @@
 
 <h2>8. Rızanın geri çekilmesi</h2>
 <p>
-  Açık rızanı her zaman geri çekebilirsin. Sağlık verisi olmadan plan hesaplanamadığı için
-  rızanın geri çekilmesi hesabın kapatılması anlamına gelir; bu nedenle geri çekme işlemi
-  hesap silme adımıyla birleştirilmiştir.
+  Açık rızanı her zaman geri çekebilirsin. Üç rıza birbirinden bağımsızdır:
+</p>
+<table>
+  <tr><th>Rıza</th><th>Nasıl geri çekilir</th><th>Sonucu</th></tr>
+  <tr>
+    <td>Bağlı sağlık uygulaması verisi</td>
+    <td>Ayarlar → gelişmiş takip anahtarını kapat (ya da izni Health Connect
+    uygulamasından geri al)</td>
+    <td>Okuma anında durur; uygulamanın geri kalanı çalışmaya devam eder</td>
+  </tr>
+  <tr>
+    <td>Vücut fotoğrafları</td>
+    <td>İlerleme fotoğrafları ekranından fotoğrafları sil</td>
+    <td>Görsel kayıt kalmaz; uygulamanın geri kalanı çalışmaya devam eder</td>
+  </tr>
+  <tr>
+    <td>Vücut ölçüleri ve sağlık metrikleri</td>
+    <td>Ayarlar → Hesabımı sil</td>
+    <td>Bu veri olmadan plan hesaplanamadığı için geri çekme, hesabın kapatılması
+    anlamına gelir</td>
+  </tr>
+</table>
+<p>
+  Yani gelişmiş takibi ve fotoğrafları hesabını kapatmadan iptal edebilirsin; yalnızca
+  temel ölçü verisinin rızasını geri çekmek hesap silmeyi gerektirir.
 </p>
 </main>
 

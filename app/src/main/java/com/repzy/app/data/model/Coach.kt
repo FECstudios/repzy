@@ -27,8 +27,20 @@ data class DailyBrief(
     val limitReached: Boolean = false,
 )
 
+/**
+ * Saatten/telefondan gelen gunluk aktivite. Sunucuda saklanmiyor, sadece
+ * o gunun brief'ini uretirken baglama ekleniyor.
+ */
+@Serializable
+data class DeviceActivity(
+    val steps: Long? = null,
+    @SerialName("active_calories") val activeCalories: Int? = null,
+    @SerialName("exercise_minutes") val exerciseMinutes: Int? = null,
+)
+
 @Serializable
 data class DailyBriefRequest(
     val force: Boolean = false,
     val locale: String = "tr",
+    val activity: DeviceActivity? = null,
 )

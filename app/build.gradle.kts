@@ -30,6 +30,8 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", "\"${localProp("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProp("SUPABASE_ANON_KEY")}\"")
+        // Google Cloud > OAuth istemcisi (WEB tipi). Gizli degil ama repoya konmuyor.
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("GOOGLE_WEB_CLIENT_ID")}\"")
     }
 
     buildTypes {
@@ -109,6 +111,14 @@ dependencies {
     // MP4 egzersiz videosu icin oynatici.
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
+
+    // Gelismis takip: saat/telefon adim ve aktif kalori verisi (sadece okuma).
+    implementation(libs.health.connect)
+
+    // Google ile giris: Credential Manager (sistem hesap secici) + kimlik token'i.
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.google.id)
 
     // Kameradan gelen fotoğrafın EXIF yönünü düzeltmek için.
     implementation(libs.androidx.exifinterface)

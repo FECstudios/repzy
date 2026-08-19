@@ -47,6 +47,19 @@ data class BodyMetric(
     val note: String? = null,
 )
 
+/**
+ * Fotoğrafın kendisi Storage'da; burada sadece yolu duruyor.
+ * Görüntülemek için imzalı URL üretilir — bucket public değil.
+ */
+@Serializable
+data class BodyPhoto(
+    val id: String? = null,
+    @SerialName("user_id") val userId: String? = null,
+    @SerialName("storage_path") val storagePath: String,
+    val pose: PhotoPose,
+    @SerialName("taken_on") val takenOn: LocalDate,
+)
+
 @Serializable
 data class WaterLog(
     val id: String? = null,

@@ -25,6 +25,17 @@ class UiPrefs @Inject constructor(
 
     suspend fun isCoachExpanded(): Boolean = coachExpanded.first()
 
+    /** Gelismis takip (Health Connect) kullanici tarafindan acildi mi? */
+    private val advancedTrackingKey = booleanPreferencesKey("advanced_tracking")
+
+    val advancedTracking: Flow<Boolean> = dataStore.data.map { it[advancedTrackingKey] == true }
+
+    suspend fun isAdvancedTracking(): Boolean = advancedTracking.first()
+
+    suspend fun setAdvancedTracking(enabled: Boolean) {
+        dataStore.edit { it[advancedTrackingKey] = enabled }
+    }
+
     suspend fun setCoachExpanded(expanded: Boolean) {
         dataStore.edit { it[coachExpandedKey] = expanded }
     }

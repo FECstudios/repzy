@@ -48,7 +48,9 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.repzy.app.R
+import androidx.health.connect.client.PermissionController
 import com.repzy.app.core.Legal
+import com.repzy.app.health.HealthAvailability
 import com.repzy.app.notifications.Reminders
 import com.repzy.app.data.model.ActivityLevel
 import com.repzy.app.data.model.EquipmentAccess
@@ -64,6 +66,7 @@ import java.util.Locale
 fun SettingsScreen(
     onSignOut: () -> Unit,
     onPremiumClick: () -> Unit,
+    onPhotosClick: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -71,6 +74,11 @@ fun SettingsScreen(
     val turkish = isTurkishUi()
     // Onay kelimesi çevrilebilir: İngilizce arayüzde DELETE, Türkçede SİL yazılır.
     val confirmationWord = stringResource(R.string.settings_delete_word)
+
+    // Health Connect kendi izin ekranini aciyor; sonucu kontrat uzerinden aliyoruz.
+    val healthLauncher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract(),
+    ) { viewModel.refreshHealthPermission() }
 
     // Android 13+ bildirim izni: kullanıcı anahtarı açtığında isteniyor, açılışta değil.
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -266,6 +274,13 @@ fun SettingsScreen(
             }
         }
 
+        Spacer(Modifier.height(8.dp))
+
+        // Fotoğraf ölçümlerin yanına ait: ikisi de "ilerleme" başlığı altında aranıyor.
+        OutlinedButton(onClick = onPhotosClick, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.settings_photos))
+        }
+
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
         // --- Hedefler ---
@@ -432,6 +447,50 @@ fun SettingsScreen(
         }
 
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+        // --- Gelismis takip ---
+        SectionTitle(stringResource(R.string.settings_section_tracking))
+        when (state.healthAvailability) {
+            HealthAvailability.AVAILABLE -> {
+                SwitchRow(
+                    title = stringResource(R.string.settings_advanced_tracking),
+                    subtitle = stringResource(R.string.settings_advanced_tracking_desc),
+                    checked = state.advancedTracking,
+                    onCheckedChange = { enabled ->
+                        if (enabled) {
+                            healthLauncher.launch(viewModel.healthPermissions)
+                        } else {
+                            viewModel.setAdvancedTracking(false)
+                        }
+                    },
+                )
+                if (state.advancedTracking) {
+                    Text(
+                        text = stringResource(R.string.settings_advanced_tracking_revoke),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            HealthAvailability.NEEDS_INSTALL -> {
+                Text(
+                    text = stringResource(R.string.settings_health_needs_install),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                OutlinedButton(
+                    onClick = { openUrl(context, HEALTH_CONNECT_PLAY_URL) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.settings_health_install))
+                }
+            }
+            HealthAvailability.UNSUPPORTED -> Text(
+                text = stringResource(R.string.settings_health_unsupported),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         // --- Dil ---
         SectionTitle(stringResource(R.string.settings_section_language))
@@ -646,6 +705,9 @@ private fun SwitchRow(
  * metinler `docs/` klasöründen yayınlandığı için tek kaynak korunuyor.
  * Tarayıcı yoksa (nadir) çökmemesi için hata yutuluyor.
  */
+private const val HEALTH_CONNECT_PLAY_URL =
+    "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata"
+
 private fun openUrl(context: Context, url: String) {
     runCatching {
         context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))

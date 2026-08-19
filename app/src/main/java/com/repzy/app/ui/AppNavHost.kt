@@ -33,6 +33,7 @@ import com.repzy.app.ui.library.ExerciseDetailScreen
 import com.repzy.app.ui.library.ExerciseLibraryScreen
 import com.repzy.app.ui.nutrition.NutritionScreen
 import com.repzy.app.ui.paywall.PaywallScreen
+import com.repzy.app.ui.photos.BodyPhotosScreen
 import com.repzy.app.ui.settings.SettingsScreen
 import com.repzy.app.ui.workout.WorkoutScreen
 import com.repzy.app.ui.workout.WorkoutViewModel
@@ -52,6 +53,9 @@ object SettingsRoute
 
 @Serializable
 object PaywallRoute
+
+@Serializable
+object BodyPhotosRoute
 
 @Serializable
 data class ExerciseDetailRoute(val id: String)
@@ -88,7 +92,8 @@ fun AppNavHost(
     // Detay ve seçici tam ekran açılır — alt çubuk gizlenir.
     val showBottomBar = currentDestination?.hasRoute<ExerciseDetailRoute>() != true &&
         currentDestination?.hasRoute<WorkoutPickerRoute>() != true &&
-        currentDestination?.hasRoute<PaywallRoute>() != true
+        currentDestination?.hasRoute<PaywallRoute>() != true &&
+        currentDestination?.hasRoute<BodyPhotosRoute>() != true
 
     Scaffold(
         bottomBar = {
@@ -134,7 +139,12 @@ fun AppNavHost(
                 SettingsScreen(
                     onSignOut = onSignOut,
                     onPremiumClick = { navController.navigate(PaywallRoute) },
+                    onPhotosClick = { navController.navigate(BodyPhotosRoute) },
                 )
+            }
+
+            composable<BodyPhotosRoute> {
+                BodyPhotosScreen(onBack = { navController.popBackStack() })
             }
 
             navigation<WorkoutGraph>(startDestination = WorkoutRoute) {

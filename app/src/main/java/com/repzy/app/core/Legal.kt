@@ -5,12 +5,17 @@ package com.repzy.app.core
  * GitHub Pages ile yayınlanıyor — Play Console gizlilik politikası ve veri silme
  * URL'i zorunlu kıldığı için uygulama içi ekran yeterli değil.
  *
- * Pages açıldıktan sonra [BASE] güncellenecek. Adres değişirse tek yer burası.
+ * Adres `github.com/FECstudios/repzy` deposundan türüyor. Depo adı ya da sahibi
+ * değişirse tek değişecek yer burası.
+ *
+ * **Çalışması için Pages'in açık olması gerekiyor:** GitHub → Settings → Pages →
+ * Source: "Deploy from a branch", Branch: `master`, Folder: `/docs`. Açılmadan
+ * uygulamadaki "Gizlilik Politikası" bağlantıları 404 döner.
  */
 object Legal {
 
-    /** Örnek: "https://kullaniciadi.github.io/repzy/" — sonundaki eğik çizgi kalsın. */
-    const val BASE = "https://repzy.github.io/repzy/"
+    /** Sonundaki eğik çizgi kalsın — dosya adları buna ekleniyor. */
+    const val BASE = "https://fecstudios.github.io/repzy/"
 
     private const val TURKISH_PRIVACY = "gizlilik.html"
     private const val ENGLISH_PRIVACY = "privacy.html"

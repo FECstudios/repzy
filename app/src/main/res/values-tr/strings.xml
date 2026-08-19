@@ -316,4 +316,45 @@
     <string name="paywall_evidence_title">Kayıt tutmak neden işe yarıyor</string>
     <string name="paywall_evidence_body">Kontrollü bir kilo verme çalışmasında, günlük yemek kaydı tutanlar aynı programdaki tutmayanlara göre yaklaşık iki kat kilo verdi (Hollis ve ark., Am J Prev Med, 2008). Öz-izleme derlemeleri de aynı yönü gösteriyor: yazan kişi daha ileri gidiyor.</string>
     <string name="paywall_evidence_note">Bu, genel olarak yemek ve antrenman kaydı üzerine yayınlanmış araştırma — Repzy kullanımının ölçülmüş sonucu değil. Premium, kayıt tutmayı kolaylaştıran araçların günlük limitlerini kaldırıyor.</string>
+    <string name="home_today_title">Bugün</string>
+    <string name="home_progress_title">İlerlemen</string>
+    <string name="home_week_calories">Son 7 günün kalorisi</string>
+    <string name="home_day_initials">P,S,Ç,P,C,C,P</string>
+    <string name="settings_section_tracking">Gelişmiş takip</string>
+    <string name="settings_advanced_tracking">Health Connect\u2019ten oku</string>
+    <string name="settings_advanced_tracking_desc">Saatinden veya telefonundan adım, aktif kalori ve antrenman süresi. Sadece okuma — Repzy Health Connect\u2019e hiçbir şey yazmaz.</string>
+    <string name="settings_advanced_tracking_revoke">Kapatmak Repzy\u2019nin veriyi okumasını durdurur. İzni tamamen geri almak için Health Connect uygulamasını kullan.</string>
+    <string name="settings_health_needs_install">Health Connect kurulu değil ya da güncellenmesi gerekiyor.</string>
+    <string name="settings_health_install">Health Connect\u2019i kur</string>
+    <string name="settings_health_unsupported">Bu cihaz Health Connect desteklemiyor.</string>
+    <string name="home_steps">Adım</string>
+    <string name="home_active_calories">Aktif yakım</string>
+    <string name="home_active_minutes">Aktif süre</string>
+    <string name="home_minutes_short">dk</string>
+    <string name="auth_or">veya</string>
+    <string name="auth_google">Google ile devam et</string>
+
+    <string name="action_cancel">Vazgeç</string>
+    <string name="action_close">Kapat</string>
+
+    <string name="settings_photos">İlerleme fotoğrafları</string>
+    <string name="photos_title">İlerleme fotoğrafları</string>
+    <string name="photos_intro">Fotoğraflar yalnızca senin hesabında kalır. AI\'ya hiç gönderilmez, yemek ya da koç analizinde kullanılmaz.</string>
+    <string name="photos_pose_front">Ön</string>
+    <string name="photos_pose_side">Yan</string>
+    <string name="photos_pose_back">Arka</string>
+    <string name="photos_take">Fotoğraf çek</string>
+    <string name="photos_pick">Galeriden seç</string>
+    <string name="photos_uploading">Yükleniyor…</string>
+    <string name="photos_empty">Bu pozda henüz fotoğraf yok. İlki başlangıç noktan olur.</string>
+    <string name="photos_compare">Karşılaştır</string>
+    <string name="photos_compare_hint">Karşılaştırmak için iki fotoğraf seç.</string>
+    <string name="photos_compare_ready">İki fotoğraf seçildi — tutamağı sürükleyerek karşılaştır.</string>
+    <string name="photos_delete_title">Fotoğrafı sil</string>
+    <string name="photos_delete_body">Fotoğraf hesabından ve depolamadan kaldırılacak. Bu işlem geri alınamaz.</string>
+    <string name="photos_delete_confirm">Sil</string>
+    <string name="photos_consent_title">Vücut fotoğrafı için ayrı açık rıza</string>
+    <string name="photos_consent_body">Vücut fotoğrafı özel nitelikli kişisel veridir; bu yüzden başlangıçta verdiğin rıza bunu kapsamaz. Fotoğraflar şifreli saklanır, yalnızca sen görürsün, AI\'ya hiç gönderilmez ve hesabını silince onlar da silinir.</string>
+    <string name="photos_consent_checkbox">Kendi ilerlememi takip edebilmem için vücut fotoğraflarımın Repzy tarafından saklanmasına açık rıza veriyorum.</string>
+    <string name="photos_consent_accept">Açık rıza veriyorum</string>
 </resources>

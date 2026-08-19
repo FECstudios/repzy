@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -365,13 +366,20 @@ private fun PendingSheet(
     onConfirm: () -> Unit,
     onDiscard: () -> Unit,
 ) {
+    // Kalem sayisi artinca butun icerik ekrana sigmiyordu ve "Gunluge kaydet"
+    // erisilemez oluyordu. Cozum: liste kaydiriliyor, butonlar altta sabit.
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .padding(bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+            .navigationBarsPadding(),
     ) {
+        Column(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
         Text(
             text = stringResource(R.string.nutrition_review_title),
             style = MaterialTheme.typography.headlineSmall,
@@ -433,16 +441,30 @@ private fun PendingSheet(
             ),
             style = MaterialTheme.typography.titleMedium,
         )
-
-        Button(
-            onClick = onConfirm,
-            enabled = pending.canSave,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(stringResource(R.string.nutrition_save))
+            Spacer(Modifier.height(4.dp))
         }
-        TextButton(onClick = onDiscard, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.common_cancel))
+
+        // Sabit alt blok — liste ne kadar uzun olursa olsun gorunur kalir.
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 8.dp, bottom = 16.dp),
+            ) {
+                Button(
+                    onClick = onConfirm,
+                    enabled = pending.canSave,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                ) {
+                    Text(stringResource(R.string.nutrition_save))
+                }
+                TextButton(onClick = onDiscard, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            }
         }
     }
 }

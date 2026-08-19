@@ -8,6 +8,14 @@
     <!-- Play Billing: abonelik satın alma. -->
     <uses-permission android:name="com.android.vending.BILLING" />
 
+    <!--
+        Gelismis takip: SADECE okuma izinleri. Yazma istemiyoruz ki Play onayi
+        basit kalsin ve kullanicinin saglik kayitlarina dokunmayalim.
+    -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+
     <application
         android:name=".RepzyApp"
         android:allowBackup="false"
@@ -28,6 +36,19 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Supabase e-posta dogrulama donusu: repzy://login-callback -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="repzy" android:host="login-callback" />
+            </intent-filter>
+
+            <!-- Health Connect izin ekranindaki "neden?" baglantisi buraya gelir. -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
         </activity>
 

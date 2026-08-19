@@ -60,6 +60,10 @@ function systemPrompt(locale: string): string {
     "- Never diagnose, never mention medication or supplements, never promise",
     "  a rate of weight change. This is wellness guidance, not medical advice.",
     "- Do not invent data that is not in the JSON.",
+    "- If device_activity is present it comes from the user's watch or phone",
+    "  (steps, active calories, exercise minutes). Use it: a high step count with",
+    "  no logged workout still counts as movement, and a very low one is worth naming.",
+    "  Never treat missing device_activity as zero activity.",
   ].join("\n");
 }
 
@@ -132,7 +136,11 @@ Deno.serve(async (req) => {
   const user = userData?.user;
   if (userError || !user) return json({ error: "unauthorized" }, 401);
 
-  let body: { force?: boolean; locale?: string } = {};
+  let body: {
+    force?: boolean;
+    locale?: string;
+    activity?: { steps?: number; active_calories?: number; exercise_minutes?: number };
+  } = {};
   try {
     body = await req.json();
   } catch {
@@ -174,6 +182,12 @@ Deno.serve(async (req) => {
     return json({ error: "context_failed" }, 500);
   }
 
+  // Saat/telefon aktivitesi istemciden geliyor (Health Connect sunucudan okunamaz).
+  // Saklanmiyor, sadece bu istegin baglamina ekleniyor.
+  const contextWithActivity = body.activity
+    ? { ...(context as Record<string, unknown>), device_activity: body.activity }
+    : context;
+
   const model = Deno.env.get("AI_MODEL") ?? DEFAULT_MODEL;
   const baseUrl = Deno.env.get("AI_BASE_URL") ?? DEFAULT_BASE_URL;
 
@@ -191,7 +205,7 @@ Deno.serve(async (req) => {
         ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
         messages: [
           { role: "system", content: systemPrompt(locale) },
-          { role: "user", content: JSON.stringify(context) },
+          { role: "user", content: JSON.stringify(contextWithActivity) },
         ],
       }),
     });

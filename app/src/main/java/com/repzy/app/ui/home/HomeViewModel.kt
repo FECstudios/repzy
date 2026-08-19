@@ -9,6 +9,7 @@ import com.repzy.app.data.model.BodyMetric
 import com.repzy.app.data.local.UiPrefs
 import com.repzy.app.data.model.DailyBrief
 import com.repzy.app.data.model.DayNutrition
+import com.repzy.app.data.model.DeviceActivity
 import com.repzy.app.data.model.NutritionTarget
 import com.repzy.app.data.model.Profile
 import com.repzy.app.data.repo.CoachRepository
@@ -16,6 +17,8 @@ import com.repzy.app.data.repo.DailyLogRepository
 import com.repzy.app.data.repo.MealRepository
 import com.repzy.app.data.repo.ProfileRepository
 import com.repzy.app.data.repo.SubscriptionRepository
+import com.repzy.app.health.HealthConnectRepository
+import com.repzy.app.health.HealthSnapshot
 import androidx.glance.appwidget.updateAll
 import com.repzy.app.widget.RepzyWidget
 import com.repzy.app.widget.WidgetData
@@ -41,6 +44,8 @@ data class HomeUiState(
     val latestMetric: BodyMetric? = null,
     val waterMl: Int = 0,
     val caloriesEaten: Int = 0,
+    val day: DayNutrition = DayNutrition(),
+    val today: LocalDate = java.time.LocalDate.now().toKotlinLocalDate(),
     val streakDays: Int = 0,
     val isWaterUpdating: Boolean = false,
     val brief: DailyBrief? = null,
@@ -50,6 +55,7 @@ data class HomeUiState(
     val isCoachExpanded: Boolean = true,
     val metricHistory: List<BodyMetric> = emptyList(),
     val calorieHistory: Map<LocalDate, Int> = emptyMap(),
+    val health: HealthSnapshot? = null,
     val error: String? = null,
 ) {
     val bmi: Double?
@@ -75,6 +81,10 @@ data class HomeUiState(
     val caloriesLeft: Int get() = (calorieTarget - caloriesEaten).coerceAtLeast(0)
 }
 
+/** Health Connect ozetini brief istegine cevirir; hepsi null ise gonderilmez. */
+private fun HealthSnapshot.toDeviceActivity(): DeviceActivity? =
+    if (!hasData) null else DeviceActivity(steps, activeCalories, exerciseMinutes)
+
 /** Paralel yüklemenin sonucu — destructuring için data class. */
 private data class LoadResults(
     val profile: Result<Profile?>,
@@ -97,6 +107,7 @@ class HomeViewModel @Inject constructor(
     private val widgetSnapshotStore: WidgetSnapshotStore,
     private val subscriptionRepository: SubscriptionRepository,
     private val uiPrefs: UiPrefs,
+    private val healthRepository: HealthConnectRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -144,6 +155,8 @@ class HomeViewModel @Inject constructor(
                 latestMetric = metric.getOrNull(),
                 waterMl = water.getOrDefault(0),
                 caloriesEaten = nutrition.getOrNull()?.calories ?: 0,
+                day = nutrition.getOrDefault(DayNutrition()),
+                today = today,
                 metricHistory = history.getOrDefault(emptyList()),
                 calorieHistory = calories.getOrDefault(emptyMap()),
                 streakDays = streak.getOrDefault(0),
@@ -151,8 +164,10 @@ class HomeViewModel @Inject constructor(
             )
 
             publishWidgetSnapshot()
-            loadBrief(force = false)
             loadPremium()
+            // Once saglik verisi okunur, sonra brief: koc adimi da gorebilsin.
+            loadHealth()
+            loadBrief(force = false)
             _state.update { it.copy(isCoachExpanded = uiPrefs.isCoachExpanded()) }
         }
     }
@@ -188,7 +203,11 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(isBriefLoading = true, briefError = null) }
 
         viewModelScope.launch {
-            coachRepository.dailyBrief(force = force, locale = Locale.getDefault().language)
+            coachRepository.dailyBrief(
+                force = force,
+                locale = Locale.getDefault().language,
+                activity = _state.value.health?.toDeviceActivity(),
+            )
                 .onSuccess { brief ->
                     _state.update { it.copy(brief = brief, isBriefLoading = false) }
                 }
@@ -211,6 +230,20 @@ class HomeViewModel @Inject constructor(
         val expanded = !_state.value.isCoachExpanded
         _state.update { it.copy(isCoachExpanded = expanded) }
         viewModelScope.launch { uiPrefs.setCoachExpanded(expanded) }
+    }
+
+    /**
+     * Gelismis takip aciksa gunluk adim/aktif kalori ozeti okunur.
+     * Kapaliysa ya da izin yoksa hicbir sey cagirilmiyor.
+     */
+    private suspend fun loadHealth() {
+        if (!uiPrefs.isAdvancedTracking()) return
+        if (!healthRepository.hasPermissions()) return
+
+        val snapshot = healthRepository.today().getOrNull()
+        if (snapshot?.hasData == true) {
+            _state.update { it.copy(health = snapshot) }
+        }
     }
 
     fun dismissBriefError() = _state.update { it.copy(briefError = null) }

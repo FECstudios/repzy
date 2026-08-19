@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +50,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.repzy.app.R
 import com.repzy.app.data.model.DailyBrief
 import com.repzy.app.ui.components.MetricRow
+import com.repzy.app.core.BodyMath
+import com.repzy.app.ui.components.WeeklyBars
+import com.repzy.app.ui.components.WeightChart
 import com.repzy.app.ui.components.UpgradeCard
 import com.repzy.app.ui.components.MetricTile
 import java.util.Locale
@@ -126,50 +130,89 @@ fun HomeScreen(
         val target = state.target
         if (target != null) {
             Text(
-                text = stringResource(R.string.home_targets_title),
+                text = stringResource(R.string.home_today_title),
                 style = MaterialTheme.typography.titleMedium,
             )
+
+            // Onceden sadece hedef yaziyordu; artik "yenen / hedef" ve ilerleme cubugu.
+            CalorieProgressCard(state = state)
+
             MetricRow {
-                MetricTile(
-                    label = stringResource(R.string.metric_calories),
-                    value = target.calories.toString(),
-                    hint = stringResource(R.string.unit_kcal_per_day),
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
+                MacroTile(
+                    label = stringResource(R.string.metric_protein),
+                    eaten = state.day.proteinG,
+                    target = target.proteinG,
                 )
-                state.bmi?.let { bmi ->
+                MacroTile(
+                    label = stringResource(R.string.metric_carbs),
+                    eaten = state.day.carbsG,
+                    target = target.carbsG,
+                )
+                MacroTile(
+                    label = stringResource(R.string.metric_fat),
+                    eaten = state.day.fatG,
+                    target = target.fatG,
+                )
+            }
+
+            state.health?.let { health ->
+                MetricRow {
+                    health.steps?.let {
+                        MetricTile(
+                            label = stringResource(R.string.home_steps),
+                            value = it.toString(),
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        )
+                    }
+                    health.activeCalories?.let {
+                        MetricTile(
+                            label = stringResource(R.string.home_active_calories),
+                            value = "$it",
+                            hint = "kcal",
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        )
+                    }
+                    health.exerciseMinutes?.let {
+                        MetricTile(
+                            label = stringResource(R.string.home_active_minutes),
+                            value = "$it",
+                            hint = stringResource(R.string.home_minutes_short),
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.home_progress_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+
+            ProgressCard(title = stringResource(R.string.home_week_calories)) {
+                WeeklyBars(
+                    values = state.calorieHistory,
+                    today = state.today,
+                    target = state.calorieTarget,
+                    dayLabels = stringResource(R.string.home_day_initials).split(","),
+                )
+            }
+
+            ProgressCard(title = stringResource(R.string.settings_weight_history)) {
+                WeightChart(metrics = state.metricHistory)
+            }
+
+            state.bmi?.let { bmi ->
+                MetricRow {
                     MetricTile(
                         label = stringResource(R.string.metric_bmi),
                         value = String.format(Locale.getDefault(), "%.1f", bmi),
+                        hint = stringResource(bmiBandLabel(bmi)),
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight(),
                     )
                 }
-            }
-            MetricRow {
-                MetricTile(
-                    label = stringResource(R.string.metric_protein),
-                    value = "${target.proteinG}${stringResource(R.string.unit_gram)}",
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
-                MetricTile(
-                    label = stringResource(R.string.metric_carbs),
-                    value = "${target.carbsG}${stringResource(R.string.unit_gram)}",
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
-                MetricTile(
-                    label = stringResource(R.string.metric_fat),
-                    value = "${target.fatG}${stringResource(R.string.unit_gram)}",
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                )
             }
         }
 
@@ -187,6 +230,81 @@ fun HomeScreen(
 
         Spacer(Modifier.height(16.dp))
     }
+}
+
+/** Gunun kalorisi: yenen / hedef + ilerleme. Su kartiyla ayni dili konusuyor. */
+@Composable
+private fun CalorieProgressCard(state: HomeUiState) {
+    val progress by animateFloatAsState(state.calorieProgress, label = "calorieProgress")
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(18.dp)) {
+            Text(
+                text = stringResource(R.string.metric_calories),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = "${state.caloriesEaten} / ${state.calorieTarget}",
+                style = MaterialTheme.typography.headlineMedium,
+            )
+            Spacer(Modifier.height(10.dp))
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp),
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.nutrition_calories_left, state.caloriesLeft),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** Makro kutusu: "46 / 114 g" — hedefin yaninda ne kadarinin yendigi. */
+@Composable
+private fun RowScope.MacroTile(label: String, eaten: Int, target: Int) {
+    MetricTile(
+        label = label,
+        value = "$eaten",
+        hint = "/ $target${stringResource(R.string.unit_gram)}",
+        modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight(),
+    )
+}
+
+@Composable
+private fun ProgressCard(title: String, content: @Composable () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(18.dp)) {
+            Text(text = title, style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(10.dp))
+            content()
+        }
+    }
+}
+
+private fun bmiBandLabel(bmi: Double): Int = when (BodyMath.bmiBand(bmi)) {
+    BodyMath.BmiBand.UNDERWEIGHT -> R.string.bmi_underweight
+    BodyMath.BmiBand.NORMAL -> R.string.bmi_normal
+    BodyMath.BmiBand.OVERWEIGHT -> R.string.bmi_overweight
+    BodyMath.BmiBand.OBESE -> R.string.bmi_obese
 }
 
 @Composable

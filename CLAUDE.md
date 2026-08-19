@@ -74,14 +74,36 @@ Günlük limit: $3 (yaklaşık 1.000–3.000 yemek fotoğrafı analizi). Limit d
 Amaç: uçtan uca çalışan ince bir dikey dilim. Önce bu bitecek.
 
 - [x] Supabase şeması + auth (e-posta/şifre; migration'lar `supabase/migrations/`)
+- [x] **Google ile giriş**: `data/repo/GoogleAuthRepository.kt` — tarayıcı OAuth değil,
+      **Credential Manager** (kullanıcı uygulamadan çıkmıyor). Alınan kimlik token'ı
+      `signInWith(IDToken)` ile Supabase'e veriliyor; ham nonce istemcide, SHA-256'lısı
+      Google'a gidiyor. `GOOGLE_WEB_CLIENT_ID` `local.properties`'ten BuildConfig'e
+      geçiyor — boşsa buton hiç çizilmiyor. Derin bağlantı: `repzy://login-callback`
+      (manifest + `SupabaseModule` scheme/host + Supabase Redirect URLs).
+      **Gerçek cihazda doğrulandı** (18 Ağu 2026): çıkış → "Google ile devam et" →
+      e-posta eşleştiği için mevcut hesaba bağlandı, veri aynen döndü (yeni kullanıcı açmadı).
+      _Google Cloud'da hem `com.repzy.app.debug` hem `com.repzy.app` için Android
+      istemcisi gerekiyor; SHA-1 farklı olduğu için release imzası ayrıca eklenecek._
 - [x] Onboarding akışı: 10 adım — açık rıza, isim, cinsiyet+doğum yılı, boy/kilo,
       hedef, deneyim, ekipman, aktivite, çevre ölçüleri, özet.
       Kayıt tek RPC ile atomik: `complete_onboarding(jsonb)`
 - [x] Vücut yağ %: Navy Method (boyun + bel + kalça) — `BodyMath.navyBodyFatPct`
       _Eksik: kullanıcının elle girmesi (cihaz/kaliper değeri) henüz yok_
 - [x] BMI: girilmez, kilo/boydan türetilir (DB'de saklanmaz)
-- [ ] Vücut fotoğrafı (ön + yan) — açık rıza şart. Storage bucket + politika hazır,
-      ekran ve rıza akışı yok
+- [x] **Vücut fotoğrafı + before/after karşılaştırma**: `ui/photos/` + `data/repo/BodyPhotoRepository.kt`.
+      Ayarlar > İlerleme fotoğrafları. Ön/yan/arka pozu, kameradan veya galeriden,
+      1440 px'e küçültülüp `body-photos` bucket'ına yükleniyor (base64 değil ham JPEG).
+      Bucket public değil — gösterim için 1 saatlik **imzalı URL** üretiliyor.
+      Fotoğraf **AI'ya gönderilmiyor**; yemek fotoğrafından farkı bu.
+      Ayrı açık rıza kapısı: `photo_consent_at` dolu değilse çekme/seçme düğmeleri hiç
+      çizilmiyor (onboarding rızası bunu kapsamıyor, KVKK spesifik rıza istiyor).
+      Karşılaştırma aynı poz içinde iki fotoğraf seçilerek açılıyor; eski "önce",
+      yeni "sonra" oluyor. Silme önce dosyayı, sonra satırı siliyor.
+      **Gerçek cihazda doğrulandı** (18 Ağu 2026): iki fotoğraf yüklendi, imzalı URL'lerle
+      göründü, slider sürüklendi, ikisi de silindi.
+      _Slider'da bir tuzak var: "önce" katmanını dar bir kutuya koyup kırpmak iki
+      fotoğrafı hizasız bırakıyor (dar kutu Crop'un ölçeğini ve merkezini değiştiriyor).
+      Kırpma layout'ta değil `drawWithContent` + `clipRect` ile ÇİZİMDE yapılıyor._
 - [x] Kalıcı profil + **Ayarlar sekmesi**: onboarding'de girilen her şey düzenlenebiliyor
       (isim, cinsiyet, doğum yılı, boy, hedef, deneyim, ekipman, aktivite), ölçüler
       (kilo + boyun/bel/kalça) bugünün tarihine yazılıyor, Navy vücut yağı yeniden hesaplanıyor.
@@ -89,6 +111,10 @@ Amaç: uçtan uca çalışan ince bir dikey dilim. Önce bu bitecek.
       **"Planımı yeniden hesapla"** ile otomatik hesaplanıyor (`source = 'rule'`).
       Yeniden hesap önce önizleme diyaloğunda gösteriliyor, onaylanmadan yazılmıyor.
       Çıkış yap buraya taşındı.
+- [x] Ana sayfada ilerleme: kalori "yenen / hedef" + ilerleme çubuğu, makrolar
+      "37 / 113 g" biçiminde, son 7 günün kalori çubuk grafiği (hedef çizgisi kesikli,
+      kayıt olmayan gün sıfır değil soluk taban), kilo grafiği ve BMI bandı.
+      Önceden sadece hedef yazıyordu, ne kadarının yendiği görünmüyordu.
 - [x] İlerleme grafiği: Ayarlar'daki "Kilo geçmişi" kartı (`ui/components/WeightChart.kt`,
       harici kütüphane yok, tek Canvas). İki ölçümden az varsa bilgilendirme gösteriyor.
 - [x] Hesap silme (Play zorunluluğu): Ayarlar → Hesabımı sil, onay kelimesi yazılmadan
@@ -115,7 +141,7 @@ Amaç: uçtan uca çalışan ince bir dikey dilim. Önce bu bitecek.
       Türkçe döndü, öğün saatten çıkarıldı, kayıt `food_logs`'a yazıldı, "4 tarama kaldı" göründü.
 - [x] Su takibi (Home'daki su kartı: +200/+330/+500 ml, geri al, hedefe göre ilerleme)
 - [x] Streak (sunucuda `current_streak()`; aktif gün = su, yemek veya antrenman kaydı)
-- [ ] Before/after fotoğraf karşılaştırma slider'ı
+- [x] Before/after fotoğraf karşılaştırma slider'ı (`ui/components/BeforeAfterSlider.kt`)
 
 ### FAZ 2 — Kişiselleştirme
 - [ ] Egzersiz animasyonları (Lottie tercih — dosya boyutu küçük, native entegrasyon kolay)
@@ -176,6 +202,53 @@ kullanımı bu RPC ile kaydet, `.from("ai_usage").insert()` kullanma.
 - [ ] Otomatik program adaptasyonu (hedefe ulaşılmıyorsa kalori/antrenman güncelle)
 - [ ] Haftalık AI özet raporu
 - [ ] Kalan makrolara göre yemek tarifi önerisi
+
+### Gelişmiş takip (Health Connect) — kod hazır, YAYINA HAZIR DEĞİL
+`health/HealthConnectRepository.kt` + Ayarlar > Gelişmiş takip anahtarı + Ana sayfada
+adım / aktif kalori / aktif süre kutuları. **Sadece okuma izni** isteniyor (READ_STEPS,
+READ_ACTIVE_CALORIES_BURNED, READ_EXERCISE); yazma yok. Veri sunucuya gitmiyor,
+sadece ekranda gösteriliyor. Health Connect kurulu değilse Play bağlantısı,
+desteklenmiyorsa açıklama gösteriliyor. Cihazda anahtar göründü (Android 16).
+
+**Yayından önce şart olanlar:**
+1. Gizlilik politikası + KVKK metni: saat/sensör verisi şu an metinlerde geçmiyor.
+2. Bu veriler de özel nitelikli → **ayrı açık rıza** gerekiyor, mevcut rıza kapsamıyor.
+3. Play, Health Connect izinleri için ayrı bir bildirim formu istiyor.
+4. TDEE düzeltmesinde kullanılacaksa `BodyMath` ve testleri değişir — henüz kullanılmıyor.
+
+### Play Store görselleri
+`store/` — 6 ekran görüntüsü (1080x1920) + feature graphic (1024x500) + **icon-512.png**.
+Üreten betik `store/make_store_assets.py`: `store/src/` altındaki ham cihaz ekran
+görüntülerini marka zemininde çerçeveliyor. Uydurma mockup yok.
+
+**Metinler İngilizce** — listeleme global/İngilizce öncelikli (bölüm 5). Ekranlar
+uygulamayı İngilizceye alarak çekiliyor:
+`adb shell cmd locale set-app-locales com.repzy.app.debug --locales en-US`
+(bitince `--locales ""` ile geri al, yoksa cihaz İngilizce kalıyor).
+
+Betik durum çubuğunu ve hareket çubuğunu kırpıyor (`STATUS_BAR_PX` / `GESTURE_BAR_PX`):
+ham ekran görüntüsü gerçek bildirim ikonlarını ve pil yüzdesini sızdırıyordu.
+Samsung OneUI `sysui_demo` modunu engellediği için temiz durum çubuğu üretilemiyor.
+
+`icon-512.png`, `ic_launcher_foreground.xml`'deki halter geometrisinin birebir
+kopyası — ikon değişirse `app_icon()` içindeki koordinatlar da değişmeli.
+
+Ekranlar değişince: `store/src/` altına yeniden çek, sonra betiği çalıştır.
+
+_Bilinen kusur: Beslenme ekranındaki yemek adları Türkçe (Pankek, Yoğurt, Zeytin) —
+kayıtlar Türkçe arayüzdeyken girilmişti. İngilizce arayüzde bir öğün kaydedip
+o ekranı yeniden çekmek gerekiyor._
+
+### Gelişmiş takip / saat verisi (İSTENDİ — YAPILMADI)
+Kullanıcı "advanced tracking" anahtarı ve saatten veri toplama istedi. Yapılmadı çünkü
+tek başına bir anahtar değil, ayrı bir dikey dilim:
+1. **Health Connect** bağımlılığı + okuma izinleri (adım, aktif kalori, nabız, uyku).
+   Play, Health Connect izinleri için ayrı bir form onayı istiyor.
+2. Yeni veri türleri = gizlilik politikası + KVKK aydınlatma metni + Data Safety
+   formu güncellemesi. Şu anki metinlerde saat/sensör verisi geçmiyor.
+3. Bu veriler de özel nitelikli — **ayrı açık rıza** gerekiyor, mevcut rızanın kapsamında değil.
+4. DB tarafında günlük özet tablosu (adım, aktif kalori) + TDEE'yi bunlarla düzeltme kararı.
+Yarım bir anahtar koymak ("aç ama hiçbir şey toplamıyor") kullanıcıyı yanıltırdı.
 
 ### FAZ 4 — Ertelenenler
 - [ ] Kamerayla canlı form kontrolü (MediaPipe) — doğruluk/destek yükü riski var
@@ -302,30 +375,51 @@ antrenman seansı force-stop'tan sonra kaldığı yerden döndü; kullanıcını
 fotoğrafı iki kalem olarak dönüp kaydedildi; koç brief'i üretildi, veri değişince
 tavsiyesi değişti, limit dolunca AI'ya gitmedi; Ayarlar'da yeniden hesap onboarding'le
 birebir aynı sayıları verdi ve `nutrition_targets` satırını üzerine yazdı.
-19 birim testi geçiyor.
+28 birim testi geçiyor.
 
 1. **Yasal metinleri yayına al** — metinler yazıldı (`docs/`: gizlilik.html, privacy.html,
    kvkk-aydinlatma.html, hesap-silme.html, delete-account.html, index.html).
-   Kalan iş: (a) `[AD SOYAD]`, `[ADRES]`, VERBİS alanlarını doldurmak,
-   (b) çalışan bir iletişim e-postası, (c) GitHub Pages'i `docs/` klasöründen açmak,
-   (d) `core/Legal.kt` içindeki `BASE` adresini gerçek adrese çevirmek,
-   (e) Play Console'a gizlilik politikası + veri silme URL'lerini girmek.
+   Ad, adres ve iletişim e-postası dolduruldu. `core/Legal.kt` içindeki `BASE` artık
+   gerçek adres: `https://fecstudios.github.io/repzy/` (depo `FECstudios/repzy`).
+   Kalan iş: (a) **GitHub Pages'i aç** — Settings → Pages → Deploy from a branch,
+   branch `master`, folder `/docs`; açılmadan uygulama içi bağlantılar 404 döner,
+   (b) VERBİS kayıt numarasını `kvkk-aydinlatma.html` içine yazmak,
+   (c) Play Console'a gizlilik politikası + veri silme URL'lerini girmek.
    **Metinler avukat kontrolünden geçmeden yayına çıkarılmamalı.**
-2. **Vücut fotoğrafı + before/after** — Storage bucket ve politika hazır, ekran ve
-   ayrı fotoğraf rızası akışı yok.
-3. **Egzersiz görselleri/animasyonları** — `image_url` / `animation_url` kolonları boş.
-4. **Koç kartını eyleme bağla** — brief'teki eylemler şu an sadece metin; su/antrenman
+2. ~~Gizlilik/KVKK metinlerini üç yeni veri akışıyla güncelle~~ **YAPILDI (18 Ağu 2026)**
+   — `gizlilik.html`, `privacy.html`, `kvkk-aydinlatma.html` üçü de güncellendi:
+   Health Connect'ten okunan adım/aktif kalori/antrenman süresi (ve bunun koç brief'inde
+   **AI'ya gönderildiği** açıkça yazıyor), Google girişinden gelen ad + e-posta,
+   vücut fotoğrafı saklama. KVKK metnindeki "rızanın geri çekilmesi" bölümü de düzeltildi:
+   artık **üç ayrı rıza** var ve ikisi (gelişmiş takip, fotoğraflar) hesap silmeden
+   geri çekilebiliyor — eski metin hepsini hesap silmeye bağlıyordu, bu yanlıştı.
+3. **Ham hata metni kullanıcıya gösteriliyor** (18 Ağu 2026'da cihazda görüldü).
+   Koç yenilemesi `ai_failed` dönünce kart, Ktor'un istisna metnini olduğu gibi bastı:
+   gövde + `URL:` + `Headers: {Authorization=[Bearer ey... (len=1370)], apikey=[sb...]}`.
+   Sebep: `functions.invoke` non-2xx'te kendi istisnasını fırlatıyor, `CoachRepository`
+   içindeki `status != OK` dalına hiç girilmiyor; `HomeViewModel` de `e.message`'ı
+   doğrudan `briefError`'a yazıyor. Token kısaltılmış hâlde ama ham istek dökümünü
+   arayüzde göstermek yanlış. Aynı kalıp `NutritionViewModel`'de de var (`error = e.message`).
+   Yapılacak: istisnayı yakalayıp gövdeyi ayrıştır, kullanıcıya çevrilmiş mesaj göster.
+4. **Egzersiz görselleri/animasyonları** — `image_url` / `animation_url` kolonları boş.
+5. **Koç kartını eyleme bağla** — brief'teki eylemler şu an sadece metin; su/antrenman
    kartına tıklamayla gitmek ya da "yaptım" işaretlemek retention için değerli olur.
-5. **Vücut yağını elle girme** — şu an sadece Navy hesabı var, kaliper/tartı değeri
+6. **Vücut yağını elle girme** — şu an sadece Navy hesabı var, kaliper/tartı değeri
    girilemiyor (`body_fat_source` enum'u hazır).
-6. **Baseline Profile** — açılışın ilk 660 ms'si dex doğrulaması.
+7. **Baseline Profile** — açılışın ilk 660 ms'si dex doğrulaması.
 
-### Canlı Supabase durumu (17 Ağu 2026)
+### Canlı Supabase durumu (18 Ağu 2026)
 Migration 0001–0008 uygulandı. Edge Function'lar yayında: `analyze-meal`, `daily-brief`.
 Secret'lar: `AI_API_KEY` (Hack Club), varsayılanlar kodda (`google/gemini-2.5-flash`,
 günde 5 tarama, 2 brief yenileme).
+Sağlayıcılar: e-posta **ve Google** açık. Redirect URLs'te `repzy://login-callback` var.
 Deploy komutu (Docker gerekmez):
 `npx supabase functions deploy <isim> --project-ref rngtgvnllrasrmlskzaw --use-api`
+
+**Migration 0009 (`subscriptions` + `is_premium()`) canlıda YOK** — REST `PGRST205` dönüyor.
+Edge Function'lar `const { data: premium } = await supabase.rpc("is_premium")` yazdığı için
+hata yutuluyor, `premium` null kalıyor ve herkes ücretsiz limitlere düşüyor ("fail closed",
+çökme yok). Yine de uygulanmalı; yoksa her AI çağrısında boşa bir RPC turu gidiyor.
 
 ### Açılış performansı (17 Ağustos 2026 ölçümü, debug build)
 `adb logcat -s RepzyPerf` ile ölçülüyor (`core/Perf.kt`, sadece debug'da çalışır).

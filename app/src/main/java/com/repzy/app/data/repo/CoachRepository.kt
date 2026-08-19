@@ -2,6 +2,7 @@ package com.repzy.app.data.repo
 
 import com.repzy.app.data.model.DailyBrief
 import com.repzy.app.data.model.DailyBriefRequest
+import com.repzy.app.data.model.DeviceActivity
 import com.repzy.app.data.model.EdgeFunctionError
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.functions.functions
@@ -21,11 +22,15 @@ class CoachRepository @Inject constructor(
      * [force] false ise sunucu o günün kayıtlı brief'ini AI'ya gitmeden döndürür.
      * Yenileme hakkı bittiyse hata değil, kayıtlı brief + `limitReached` döner.
      */
-    suspend fun dailyBrief(force: Boolean = false, locale: String = "tr"): Result<DailyBrief> =
+    suspend fun dailyBrief(
+        force: Boolean = false,
+        locale: String = "tr",
+        activity: DeviceActivity? = null,
+    ): Result<DailyBrief> =
         runCatching {
             val response = client.functions.invoke(
                 function = "daily-brief",
-                body = DailyBriefRequest(force = force, locale = locale),
+                body = DailyBriefRequest(force = force, locale = locale, activity = activity),
             )
 
             val text = response.bodyAsText()

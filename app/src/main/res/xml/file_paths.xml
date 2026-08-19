@@ -7,4 +7,12 @@
     <cache-path
         name="meal_photos"
         path="meal_photos/" />
+
+    <!--
+        Vücut fotoğrafı da cache'e yazılıyor: kalıcı kopya Storage'da duruyor,
+        cihazda ikinci bir kopya bırakmak veri minimizasyonuna aykırı olurdu.
+    -->
+    <cache-path
+        name="body_photos"
+        path="body_photos/" />
 </paths>

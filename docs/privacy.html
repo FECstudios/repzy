@@ -14,7 +14,7 @@
 
 <main>
 <h1>Privacy Policy</h1>
-<p class="muted">Last updated: 17 August 2026</p>
+<p class="muted">Last updated: 18 August 2026</p>
 
 <div class="card">
   <p><strong>In short:</strong> Repzy uses your data only to build your plan and track
@@ -56,6 +56,23 @@
   </tr>
   <tr><td>Food and water logs</td><td>Daily calorie/macro and water tracking</td><td>No</td></tr>
   <tr><td>Meal photo</td><td>Analysed to estimate calories</td><td>No — only when you take one</td></tr>
+  <tr>
+    <td>Name and email address from your Google account</td>
+    <td>Creating your account and signing in with "Continue with Google"</td>
+    <td>No — only if you choose to sign in with Google</td>
+  </tr>
+  <tr>
+    <td>Body photos (front / side / back)</td>
+    <td>Letting you compare your own progress visually</td>
+    <td>No — only if you give separate consent and upload them</td>
+  </tr>
+  <tr>
+    <td>Step count, active calories and exercise minutes read from a connected
+        health app</td>
+    <td>Showing today's activity on your home screen and shaping the coaching brief
+        around it</td>
+    <td>No — only if you give separate consent and turn on the Health Connect link</td>
+  </tr>
 </table>
 
 <h3>About meal photos</h3>
@@ -66,13 +83,53 @@
   permission: your device's own camera app takes the picture.
 </p>
 
+<h3>About body photos</h3>
+<p>
+  Uploading body photos is entirely optional and requires a <strong>separate explicit
+  consent</strong> — the consent you give when you start using the app does not cover
+  them. Until you give it, the camera and gallery buttons are not shown at all.
+</p>
+<p>These photos are handled differently from meal photos:</p>
+<ul>
+  <li><strong>They are never sent to the AI.</strong> They are used neither for calorie
+      analysis nor for the coaching brief.</li>
+  <li>They are stored in a <strong>non-public</strong> area on the server. To display a
+      photo the app generates a private link that expires after one hour.</li>
+  <li>Only you can see them. You can delete them one by one, or all at once by deleting
+      your account.</li>
+</ul>
+
+<h3>Connected health apps (Health Connect)</h3>
+<p>
+  If you turn on advanced tracking in Settings, we read the <strong>step count, active
+  calories and exercise minutes</strong> that your watch or phone writes to Health
+  Connect. This is a <strong>read-only</strong> permission; Repzy never writes anything
+  to Health Connect. Nothing is read while the switch is off.
+</p>
+<p>
+  <strong>Important:</strong> these three values are sent to the AI provider together
+  with the other numeric summaries when your daily coaching brief is generated — they do
+  not stay on your device. We do not read heart rate, sleep or location. Turning the
+  switch off stops the reading, and you can also revoke the permission from the Health
+  Connect app itself.
+</p>
+
 <h3>Health data and explicit consent</h3>
 <p>
-  Body measurements and health metrics are treated as sensitive personal data under
-  Turkish data-protection law (KVKK Art. 6) and special category data under the GDPR.
-  We process them only on the basis of the <strong>explicit consent</strong> you give
-  when you first open the app. To withdraw consent, delete your account — all of your
-  data is deleted with it.
+  Body measurements, health metrics, body photos and activity data from connected apps
+  are treated as sensitive personal data under Turkish data-protection law (KVKK Art. 6)
+  and special category data under the GDPR. We collect <strong>three separate explicit
+  consents</strong> for them:
+</p>
+<ul>
+  <li>Body measurements and health metrics — when you first open the app</li>
+  <li>Body photos — when you first open the progress photos screen</li>
+  <li>Connected health app data — when you turn on advanced tracking</li>
+</ul>
+<p>
+  You can withdraw each one independently: turning off advanced tracking stops the
+  activity reading, and deleting your photos stops the visual record. To withdraw all of
+  them at once, delete your account — all of your data is deleted with it.
 </p>
 
 <h2>3. What we do not collect</h2>
@@ -82,6 +139,10 @@
   <li>Advertising identifiers (the app has no ads)</li>
   <li>Third-party analytics or tracking SDKs</li>
   <li>Other photos in your gallery — we only access the photo you pick</li>
+  <li>Heart rate, sleep, blood pressure or any other Health Connect record — we read
+      only steps, active calories and exercise minutes</li>
+  <li>Your Google contacts, calendar, Drive or photos — "Continue with Google" performs
+      authentication only</li>
 </ul>
 
 <h2>4. Who we share data with</h2>
@@ -97,9 +158,16 @@ only the service providers (processors) needed to run the app:</p>
   <tr>
     <td>AI provider (meal photo analysis and daily coaching brief)</td>
     <td>Calorie estimation and generating the coaching text</td>
-    <td>For photo analysis: the photo only. For the coaching brief: a numeric summary
-    (targets, daily totals, workout counts). <strong>Your name, email and photos are
+    <td>For photo analysis: the meal photo only. For the coaching brief: a numeric summary
+    (targets, daily totals, workout counts and — if advanced tracking is on — steps,
+    active calories and exercise minutes). <strong>Your name, email and body photos are
     never sent for the coaching brief.</strong></td>
+  </tr>
+  <tr>
+    <td>Google (only if you use "Continue with Google")</td>
+    <td>Verifying your identity</td>
+    <td>Repzy sends no data to Google; Google passes us your name and email address in
+    verified form.</td>
   </tr>
 </table>
 <p class="muted">
@@ -110,8 +178,11 @@ only the service providers (processors) needed to run the app:</p>
 <h2>5. Retention</h2>
 <p>
   We keep your data for as long as your account exists. When you delete your account,
-  all records (profile, measurements, workouts, food, water, coaching history) are
-  removed from the database immediately; removal from technical backups takes up to 30 days.
+  all records (profile, measurements, workouts, food, water, coaching history and
+  <strong>any body photos you uploaded</strong>) are removed immediately; removal from
+  technical backups takes up to 30 days. Step and active-calorie values read from a
+  connected health app are not stored on our servers — they are re-read each time you
+  open the app.
 </p>
 
 <h2>6. Deleting your account and data</h2>
@@ -132,8 +203,9 @@ only the service providers (processors) needed to run the app:</p>
 <h2>8. Security</h2>
 <p>
   Connections are encrypted with TLS. Row-level security is enabled in the database, so
-  each user can only read their own rows. The AI provider's API key is never shipped
-  inside the app; it exists only on the server.
+  each user can only read their own rows. The area holding body photos is not public;
+  the link generated to display one expires after an hour. The AI provider's API key is
+  never shipped inside the app; it exists only on the server.
 </p>
 
 <h2>9. Children</h2>

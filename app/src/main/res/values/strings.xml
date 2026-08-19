@@ -325,4 +325,45 @@
     <string name="paywall_evidence_title">Why logging works</string>
     <string name="paywall_evidence_body">In a controlled weight-loss trial, people who kept a daily food record lost about twice as much weight as those on the same programme who did not (Hollis et al., Am J Prev Med, 2008). Reviews of self-monitoring find the same pattern: the people who write it down get further.</string>
     <string name="paywall_evidence_note">This is published research about food and training logging in general — not a measured result of using Repzy. Premium removes the daily limits on the tools that make logging easy.</string>
+    <string name="home_today_title">Today</string>
+    <string name="home_progress_title">Your progress</string>
+    <string name="home_week_calories">Calories, last 7 days</string>
+    <string name="home_day_initials">M,T,W,T,F,S,S</string>
+    <string name="settings_section_tracking">Advanced tracking</string>
+    <string name="settings_advanced_tracking">Read from Health Connect</string>
+    <string name="settings_advanced_tracking_desc">Steps, active calories and workout minutes from your watch or phone. Read only — Repzy never writes to Health Connect.</string>
+    <string name="settings_advanced_tracking_revoke">Turning this off stops Repzy reading the data. To revoke the permission itself, use the Health Connect app.</string>
+    <string name="settings_health_needs_install">Health Connect is not installed or needs an update.</string>
+    <string name="settings_health_install">Get Health Connect</string>
+    <string name="settings_health_unsupported">This device does not support Health Connect.</string>
+    <string name="home_steps">Steps</string>
+    <string name="home_active_calories">Active burn</string>
+    <string name="home_active_minutes">Active time</string>
+    <string name="home_minutes_short">min</string>
+    <string name="auth_or">or</string>
+    <string name="auth_google">Continue with Google</string>
+
+    <string name="action_cancel">Cancel</string>
+    <string name="action_close">Close</string>
+
+    <string name="settings_photos">Progress photos</string>
+    <string name="photos_title">Progress photos</string>
+    <string name="photos_intro">Photos stay private to your account. They are never sent to the AI and never used for meal or coach analysis.</string>
+    <string name="photos_pose_front">Front</string>
+    <string name="photos_pose_side">Side</string>
+    <string name="photos_pose_back">Back</string>
+    <string name="photos_take">Take photo</string>
+    <string name="photos_pick">From gallery</string>
+    <string name="photos_uploading">Uploading…</string>
+    <string name="photos_empty">No photos in this pose yet. The first one becomes your starting point.</string>
+    <string name="photos_compare">Compare</string>
+    <string name="photos_compare_hint">Select two photos to compare them side by side.</string>
+    <string name="photos_compare_ready">Two photos selected — drag the handle to compare.</string>
+    <string name="photos_delete_title">Delete photo</string>
+    <string name="photos_delete_body">The photo will be removed from your account and from storage. This cannot be undone.</string>
+    <string name="photos_delete_confirm">Delete</string>
+    <string name="photos_consent_title">Separate consent for body photos</string>
+    <string name="photos_consent_body">Body photos count as sensitive personal data, so the consent you gave during onboarding does not cover them. Photos are stored encrypted, only you can view them, they are never sent to the AI, and deleting your account deletes them too.</string>
+    <string name="photos_consent_checkbox">I consent to Repzy storing my body photos so I can track my own progress.</string>
+    <string name="photos_consent_accept">I consent</string>
 </resources>

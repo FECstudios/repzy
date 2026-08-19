@@ -1,8 +1,11 @@
 package com.repzy.app.ui.auth
 
+import android.content.Context
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.repzy.app.data.repo.AuthRepository
+import com.repzy.app.data.repo.GoogleAuthRepository
 import com.repzy.app.data.repo.SignUpOutcome
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,7 +34,11 @@ data class AuthUiState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val googleAuthRepository: GoogleAuthRepository,
 ) : ViewModel() {
+
+    /** Web istemci kimligi girilmediyse Google butonu hic gosterilmiyor. */
+    val googleAvailable: Boolean get() = googleAuthRepository.isConfigured
 
     private val _state = MutableStateFlow(AuthUiState())
     val state: StateFlow<AuthUiState> = _state.asStateFlow()
@@ -53,6 +60,30 @@ class AuthViewModel @Inject constructor(
             errorMessage = null,
             infoMessage = null,
         )
+    }
+
+    /**
+     * Google ile giris. Basarili olursa oturumu Supabase aciyor ve
+     * RootViewModel yonlendirmeyi devraliyor — burada navigasyon yok.
+     */
+    fun signInWithGoogle(context: Context) {
+        if (_state.value.isSubmitting) return
+        _state.update { it.copy(isSubmitting = true, errorMessage = null, infoMessage = null) }
+
+        viewModelScope.launch {
+            googleAuthRepository.signIn(context)
+                .onSuccess { _state.update { it.copy(isSubmitting = false) } }
+                .onFailure { e ->
+                    // Kullanici secimi iptal ettiyse hata gostermeye gerek yok.
+                    val cancelled = e is GetCredentialCancellationException
+                    _state.update {
+                        it.copy(
+                            isSubmitting = false,
+                            errorMessage = if (cancelled) null else e.message,
+                        )
+                    }
+                }
+        }
     }
 
     fun submit() {

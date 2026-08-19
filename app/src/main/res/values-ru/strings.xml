@@ -322,4 +322,45 @@
     <string name="paywall_evidence_title">Почему ведение дневника работает</string>
     <string name="paywall_evidence_body">В контролируемом исследовании по снижению веса участники, которые ежедневно записывали еду, потеряли примерно вдвое больше веса, чем те, кто был на той же программе, но не записывал (Hollis et al., Am J Prev Med, 2008). Обзоры самонаблюдения показывают то же самое.</string>
     <string name="paywall_evidence_note">Это опубликованные исследования о ведении дневника питания и тренировок в целом, а не измеренный результат использования Repzy. Premium снимает дневные ограничения с инструментов, которые упрощают ведение записей.</string>
+    <string name="home_today_title">Сегодня</string>
+    <string name="home_progress_title">Ваш прогресс</string>
+    <string name="home_week_calories">Калории за 7 дней</string>
+    <string name="home_day_initials">П,В,С,Ч,П,С,В</string>
+    <string name="settings_section_tracking">Расширенный трекинг</string>
+    <string name="settings_advanced_tracking">Читать из Health Connect</string>
+    <string name="settings_advanced_tracking_desc">Шаги, активные калории и минуты тренировок с часов или телефона. Только чтение — Repzy ничего не записывает.</string>
+    <string name="settings_advanced_tracking_revoke">Отключение остановит чтение данных. Чтобы полностью отозвать разрешение, используйте приложение Health Connect.</string>
+    <string name="settings_health_needs_install">Health Connect не установлен или требует обновления.</string>
+    <string name="settings_health_install">Установить Health Connect</string>
+    <string name="settings_health_unsupported">Это устройство не поддерживает Health Connect.</string>
+    <string name="home_steps">Шаги</string>
+    <string name="home_active_calories">Активные ккал</string>
+    <string name="home_active_minutes">Активность</string>
+    <string name="home_minutes_short">мин</string>
+    <string name="auth_or">или</string>
+    <string name="auth_google">Продолжить с Google</string>
+
+    <string name="action_cancel">Отмена</string>
+    <string name="action_close">Закрыть</string>
+
+    <string name="settings_photos">Фото прогресса</string>
+    <string name="photos_title">Фото прогресса</string>
+    <string name="photos_intro">Фотографии остаются только в вашем аккаунте. Они не отправляются ИИ и не используются в анализе питания или советах тренера.</string>
+    <string name="photos_pose_front">Спереди</string>
+    <string name="photos_pose_side">Сбоку</string>
+    <string name="photos_pose_back">Сзади</string>
+    <string name="photos_take">Сделать фото</string>
+    <string name="photos_pick">Из галереи</string>
+    <string name="photos_uploading">Загрузка…</string>
+    <string name="photos_empty">В этой позе пока нет фотографий. Первая станет точкой отсчёта.</string>
+    <string name="photos_compare">Сравнить</string>
+    <string name="photos_compare_hint">Выберите две фотографии для сравнения.</string>
+    <string name="photos_compare_ready">Выбрано две фотографии — потяните ползунок.</string>
+    <string name="photos_delete_title">Удалить фото</string>
+    <string name="photos_delete_body">Фотография будет удалена из аккаунта и из хранилища. Отменить это нельзя.</string>
+    <string name="photos_delete_confirm">Удалить</string>
+    <string name="photos_consent_title">Отдельное согласие на фото тела</string>
+    <string name="photos_consent_body">Фотографии тела относятся к особой категории персональных данных, поэтому согласие, данное при регистрации, их не покрывает. Фото хранятся в зашифрованном виде, видны только вам, никогда не отправляются ИИ и удаляются вместе с аккаунтом.</string>
+    <string name="photos_consent_checkbox">Я даю согласие на хранение моих фотографий тела в Repzy, чтобы отслеживать собственный прогресс.</string>
+    <string name="photos_consent_accept">Я согласен</string>
 </resources>
